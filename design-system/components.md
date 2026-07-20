@@ -1,128 +1,148 @@
-# Component Definitions — BESTMED Design System v2
+# Component Definitions — BESTMED Design System v3
 
-Real BESTMED measurements, extracted from Figma component instances,
-expressed in the new v2 token scale. Every value below landed exactly on
-a defined spacing/radius step — no rounding needed.
+Untitled UI Pro fully replaces the original BESTMED Design System as
+source of truth for all UI component specs. Every measurement below is
+extracted directly from the Untitled UI Pro Figma file, 20 July 2026 —
+none are BESTMED's own production measurements anymore. Medication
+classification colours remain BESTMED-specific (design-tokens.md) — that
+is the only category with no Untitled UI equivalent, and stays exempt
+from this replacement.
+
+This is a deliberate redesign decision, not a documentation correction.
+BESTMED's currently-shipping app uses different proportions throughout
+(2px button radius vs. 8px, 120px table rows vs. 72px, etc.). Screens
+built from this file won't visually match production until the real app
+is updated to follow it.
+
+Policy going forward: any UI component not yet listed here defaults to
+Untitled UI Pro. Extract it the same way — on demand, when a real screen
+needs it — not preemptively. No more per-component confirmation needed;
+this file's existence is the standing instruction.
 
 ## Button
 
-Three sizes, all sharing --radius-xxs (2px).
-
-| Size | Height | Padding V | Padding H | Gap (icon-label) |
-|---|---|---|---|---|
-| Small | 34px | --spacing-md (8px) | --spacing-lg (12px) | --spacing-md (8px) |
-| Medium | 38px | --spacing-md (8px) | --spacing-xl (16px) | --spacing-md (8px) |
-| Large | 48px | --spacing-lg (12px) | --spacing-3xl (24px) | --spacing-md (8px) |
+| Size | Height | Padding V | Padding H | Radius | Gap (icon-label) |
+|---|---|---|---|---|---|
+| Small | 36px | 8px | 12px | --radius-md (8px) | 4px |
+| Medium | 40px | 10px | 14px | --radius-md (8px) | 4px |
+| Large | 44px | 10px | 16px | --radius-md (8px) | 4px |
+| Extra Large | 48px | 12px | 18px | --radius-md (8px) | 4px |
 
 ```html
-<button class="btn btn--medium btn--primary">Administer dose</button>
+<button class="btn btn--md btn--primary">Administer dose</button>
 ```
 
-Colour/state variants (Active/Hover/Pressed/Disabled/Destructive) exist
-in Figma, colour pairings not yet extracted — cross-check against
---bg-brand-solid (primary), --bg-error-solid (destructive), --bg-disabled
-(disabled) before hardcoding.
+Hierarchy variants confirmed: Primary, Secondary, Tertiary, Link color,
+Link gray — colour pairings not yet extracted per hierarchy.
+States confirmed: Default, Disabled, Focused — not yet individually extracted.
 
-### Icon-only / circular button
-
-- 30px or 40px square, --radius-full
-- Padding: --spacing-md (8px) all sides
+Accessibility: Large (44px) and XL (48px) clear the 44px touch-target
+minimum. Small (36px) and Medium (40px) still fall short — default to
+Large/XL for primary clinical actions.
 
 ## Badge
 
-Three sizes, two styles (Filled / Outline). Radius differs by style, not size.
-
-| Size | Height | Padding V | Padding H | Radius (Filled) | Radius (Outline) |
+| Size | Height | Padding V | Padding H | Radius (Pill) | Radius (Badge) |
 |---|---|---|---|---|---|
-| Small | 22px | --spacing-xxs (2px) | --spacing-md (8px) | --radius-2xl (16px) | --radius-3xl (20px) |
-| Medium | 26px | --spacing-xxs (2px) | --spacing-md (8px) | --radius-2xl (16px) | --radius-3xl (20px) |
-| Large | 32px | --spacing-xs (4px) | --spacing-md (8px) | --radius-2xl (16px) | --radius-3xl (20px) |
+| Small | 22px | 2px | 8px (Pill) / 6px (Badge) | 9999px | 6px |
+| Medium | 24px | 2px | 10px | 9999px | 6px |
+| Large | 28px | 4px | 12px | 9999px | 6px |
 
 ```html
-<span class="badge badge--medium badge--filled badge--success">Administered</span>
-<span class="badge badge--medium badge--outline badge--warning">Due 14:00</span>
+<span class="badge badge--pill badge--md badge--brand">Administered</span>
+<span class="badge badge--sm badge--gray">Due 14:00</span>
 ```
 
-Only "Success" geometry confirmed. Other status types (Warning, Danger,
-Info) follow the same pattern — pair with --bg-warning-primary,
---bg-error-primary etc., verify exact colour pairing against Figma
-before finalising.
+Colour variants confirmed: Brand, Gray, Gray blue — error/warning/success
+not yet extracted. Icon (dot) variant confirmed to exist, adds ~10px
+width, not yet measured in isolation.
 
-## Modal / dialog
+Medication classification badges keep BESTMED's own clinical colours —
+only shape/size geometry changes, not what colour means clinically.
 
-Three size variants, all sharing identical padding, radius, and internal
-spacing — only width and content height change.
+## Modal / Dialog
 
-| Size | Width | Padding | Radius | Internal gap |
-|---|---|---|---|---|
-| Small | 368px | --spacing-3xl (24px) | --radius-xs (4px) | --spacing-xl (16px) |
-| Medium | 568px | --spacing-3xl (24px) | --radius-xs (4px) | --spacing-xl (16px) |
-| Large | 768px | --spacing-3xl (24px) | --radius-xs (4px) | --spacing-xl (16px) |
+Confirmation-dialog pattern ("Stacked left aligned") — other modal types
+in the library (centered photo, checkboxes, file upload, etc.) follow
+different internal structures, extract separately if needed.
+
+**Outer container:** 400px width (this pattern specifically — not
+surveyed across other modal types), --radius-2xl (16px), close button
+44×44px top-right.
+
+**Header:** 24px padding, 16px internal gap. Featured icon (48×48px)
+stacked above title + description, left-aligned. 20px bottom padding,
+1px full-width divider below.
+
+**Actions footer:** 32px top padding, buttons horizontal with 12px gap.
+Two buttons (Cancel/Confirm), width is content-driven — don't hardcode.
 
 ```html
-<div class="modal modal--medium">
-  <div class="modal__body">...</div>
+<div class="modal modal--confirmation">
+  <button class="modal__close" aria-label="Close">×</button>
+  <div class="modal__header">
+    <div class="modal__icon"></div>
+    <div class="modal__text">
+      <h3 class="modal__title"></h3>
+      <p class="modal__description"></p>
+    </div>
+  </div>
+  <div class="modal__divider"></div>
+  <div class="modal__actions">
+    <button class="btn btn--lg btn--secondary">Cancel</button>
+    <button class="btn btn--lg btn--primary">Confirm</button>
+  </div>
 </div>
 ```
 
-Height is content-driven in all three variants — don't fix a height,
-let it hug content. A "Form + warning" variant exists at 768px width
-with a taller default height (468px observed) — treat as a content
-scenario, not a separate size token.
-
-Backdrop, title bar, and dual-signature/confirmation sub-patterns exist
-on this page but weren't individually extracted — pull on demand.
-
 ## Input field (text)
-
-Two sizes (Small/Medium), structure is label row → field → helper text
-row, stacked with --spacing-xs (4px) gap between rows.
 
 | Size | Field height | Padding V | Padding H | Radius |
 |---|---|---|---|---|
-| Medium | 48px | --spacing-md (8px) | --spacing-lg (12px) | --radius-xs (4px) |
-| Small | not yet measured — component exists (320×68 total), field-only height not isolated |
+| Medium | 44px | 10px | 14px | --radius-md (8px) |
+| Small | 40px | 8px | 12px | --radius-md (8px) |
 
 ```html
-<div class="input-field input-field--medium">
+<div class="input-field input-field--md">
   <label class="input-field__label">Resident name</label>
   <input class="input-field__control" type="text">
   <span class="input-field__helper"></span>
 </div>
 ```
 
-Other input types exist as separate components, not yet extracted:
-Date, Dropdown (single/multi), Multiline Text Field, Checkbox. Pull each
-on demand — don't assume they share the Text input's padding/radius.
+States confirmed: Placeholder, Filled, Disabled, Destructive (error).
+Type variants confirmed: Default, Payment input. Colour pairings for
+Destructive not yet extracted — pair with --border-error /
+--text-error-primary from design-tokens.md, verify against Figma.
 
-## Table row (Dose Rounds / resident list — confirmed from BestDOSE app file)
+## Table row
 
-Not a BESTMED library component — real row structure from the live Dose
-Rounds screen. Row height 120px, horizontal layout, --spacing-xxs (2px)
-gap between cells, --radius-xs (4px) corner radius.
+72px row height, consistent across every cell style variant (text,
+badge, avatar, checkbox, radio, toggle). Cell padding: 16px vertical,
+24px horizontal.
 
-| Column | Width | Content |
-|---|---|---|
-| Resident (photo + badge + name) | 584px | Avatar, warning badge, "LASTNAME, Firstname" |
-| DOB | 200px | Date |
-| Facility/Ward | 250px | Facility name |
-| Room | 150px | Room number |
-| MIN | 200px | Medical identifier number |
+```html
+<tr class="table-row">
+  <td class="table-row__cell">...</td>
+</tr>
+```
 
-Column widths sum to 1384px + 4×2px gaps = 1392px, matching the app's
-confirmed content width (24px real padding — see figma-links.md
-conflict note against the 32px v2 container default).
+Cell style variants confirmed to exist: Lead text, Text, Badge, Avatar
+group, Badges multiple, Lead checkbox, Lead avatar, Payment method, Lead
+avatar checkbox/radio/toggle — column content type varies by which
+variant a screen's spec calls for.
 
-This is a resident-level list, not a per-medication list — confirm which
-one a new screen actually needs before reusing this structure.
+BESTMED's real Dose Rounds table (120px rows, 584/200/250/150/200px
+columns) is superseded. Rebuilding that screen under v3 will produce a
+noticeably more compact table — 72px vs. 120px is a real, visible
+density change, not a rounding difference. Flag this before regenerating
+Dose Rounds.
 
 ## Not yet extracted
 
-- Card component (standalone, if one exists outside table rows)
-- Checkbox / Radio input styling
-- Date and Dropdown input variants
-- Tabs, page header, header/nav components seen in Dose Rounds
-- Small input field's isolated field height (only total component
-  height measured so far)
-
-Extract as they come up in a screen build, not preemptively.
+Button colour pairings per hierarchy, badge colour variants beyond
+Brand/Gray/Gray blue, other modal type patterns, input Destructive-state
+colours, and anything outside these five components — Tabs, Page
+headers, Avatars, Checkboxes, Tooltips, Dropdowns, etc. all exist in the
+Untitled UI Pro library and follow the same extraction method. Pull on
+demand.
