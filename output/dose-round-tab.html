@@ -1,60 +1,41 @@
 <!--
   Screen: IV — [BCP App] Dose Round Tab (specs/BCP+App_+Dose+Rounds.md)
-  Rendered inside the "Dose Round Resident Info" screen (section III) — back bar
-  and resident-record tab nav are included here only as the minimum surrounding
-  context needed for the Dose Round Tab content to read as a real screen.
+  Rebuilt against components.md v3 (Untitled UI Pro measurements). Rendered inside
+  the "Dose Round Resident Info" screen (section III); the back bar and resident-
+  record tab nav are minimal surrounding context, not part of section IV.
 
-  SCOPE FLAGS (surfaced to user in chat, repeated here for the next editor):
-  1. AIN-specific interaction (Admin checkbox replaced by an "RN" tick + Secondary
-     Authentication modal) is NOT built. Section V "AIN Record Administration" is
-     marked "Not Doing" for MVP ("AIN will not be able to access the app"), so the
-     AIN-only rules embedded in section IV are treated as future-state, not MVP.
-  2. Medication classification colours: the inline hex values written in the spec
-     text (e.g. Hazardous #CBC9FF, Nutritional #FFABE5, Short course #00000 —
-     the last one isn't even a valid 6-digit hex) conflict with the Figma-extracted
-     tokens in design-tokens.md (--color-med-hazardous #A500A8, --color-med-nutritional
-     #FF6DD2, --color-med-short-course #C25B76). Per CLAUDE.md, design-tokens.md is
-     source of truth (live Figma extraction) over ad-hoc spec prose, so this screen
-     uses the token values. Flagging the conflict rather than silently picking one.
-  3. Classification badges are built OUTLINE-style (white fill, coloured border,
-     --text-primary label) rather than filled colour + white text. Several
-     classification colours fail WCAG contrast as filled+white-text pairs (e.g.
-     --color-med-edit #F08F00 vs white text ≈ 2.4:1, well under the 3:1 minimum for
-     UI components) — accessibility.md requires checking each new pairing rather
-     than assuming compliance, and this pairing doesn't pass. Outline style keeps
-     the required text label on a guaranteed-compliant background regardless of
-     which clinical colour is used.
-  4. Even as an outline accent, some classification colours (e.g. --color-med-warfarin,
-     a pale yellow) don't hit 3:1 against white on their own. The colour swatch is
-     therefore treated as a supplementary/decorative cue — the adjacent text label is
-     the only thing carrying the actual information, per "never convey status by
-     colour alone." Flagging this as a known limitation of the clinical colour set,
-     not something silently fixed by altering BESTMED's actual clinical colours.
-  5. Medication-table row geometry is NOT in components.md (only the unrelated
-     Dose Rounds *resident list* row is extracted, and components.md explicitly
-     says to confirm which structure a new screen needs before reusing it). Row/cell
-     spacing here is approximated from the general spacing/radius scale — confirm
-     against Figma before treating as final.
-  6. Not built: all modal content triggered from this screen (dual-sign, PRN/BGL/INR
-     confirmation, Insulin Sliding Scale, COVID pop-up, Incident Report, Secondary
-     Authentication). components.md notes these modal sub-patterns "weren't
-     individually extracted — pull on demand." Only the on-page triggers are shown.
-  7. Not built: the "past/closed dose round" state (Reason + Admin disabled, Paper
-     Signed / Incident Report Logged buttons appear instead) — this screen shows the
-     open/active round state only.
-  8. Spec line "The 'View INR History' button will be, AND" is truncated/incomplete
-     in the source document — flagging as a spec data-quality issue, not guessing
-     the missing word. Button is shown enabled with an explicit label pending
-     clarification.
-  9. "Check 24hr Usage" button + its Paracetamol hide-rule is copied verbatim into
-     this section from the PRN screen (section VIII) but isn't structurally defined
-     for Regular meds here — not rendered on this screen, flagging rather than
-     inventing placement.
-  10. Touch targets: Admin checkboxes and Reason selects are native controls below
-      the 44×44px project minimum at their intrinsic size. Padding has been added
-      to the clickable label area per accessibility.md's guidance, but the rendered
-      hit area has not been measured against 44×44px — flag if this interaction
-      is touch-critical on the target shared tablets.
+  ==== v3 COMPONENT VALUES APPLIED ====
+  - Button: radius --radius-md (8px, was 2px); sizes 36/40/44/48px. Clinical/action
+    buttons use Large (44px) to clear the 44px touch-target minimum (v3 note).
+  - Badge: v3 geometry — Medium 24px, pill radius. Classification badges keep BESTMED
+    clinical COLOUR (design-tokens.md, exempt from v3) but v3 SHAPE: the clinical
+    colour is carried by a dot on a neutral "gray" badge base. Colour stays decorative,
+    text label carries the meaning (accessibility.md — never status by colour alone).
+  - Input (Reason select, Given field, banner inputs): Medium 44px, radius --radius-md
+    (8px, was 4px), padding 10/14.
+  - Table row: v3 72px row height, cell padding 16px V / 24px H (was content-height,
+    12px padding). See density flag below.
+
+  ==== FLAGS (carried from prior build + v3-specific) ====
+  1. TABLE DENSITY: v3 table rows are 72px with 24px horizontal cell padding. The med
+     tables here are now on that denser grid. components.md flags the row-height change
+     as "a real, visible density change, not a rounding difference." Multi-line med
+     cells (name + directions + tags) grow past 72px as needed — 72px is the base.
+  2. Button/Badge/Input colour PAIRINGS per hierarchy are "not yet extracted" in v3.
+     Secondary button, gray badge base, and error-styled tags use design-tokens.md
+     values as best-fit — verify against Figma when the pairings are extracted.
+  3. Classification badge shape: v3 offers Pill (9999px) and Badge (6px). Pill chosen
+     for these inline status markers; swap to Badge shape if Figma extraction says so.
+  4. AIN-specific interaction not built — section V "AIN Record Administration" is
+     "Not Doing" for MVP.
+  5. Med-classification colour source: spec prose lists ad-hoc hex (e.g. Hazardous
+     #CBC9FF, Short course #00000 — not valid) that conflict with the Figma tokens in
+     design-tokens.md. Tokens win per CLAUDE.md.
+  6. Modals, past/closed-round state: see output/dose-round-tab-states.html.
+  7. "View INR History" — source spec line is truncated ("...button will be, AND").
+     Button shown with explicit label pending clarification.
+  8. Tabs / back bar are contextual chrome; Tabs are "not yet extracted" in v3 — left
+     as structural placeholders, not built to a v3 spec.
 -->
 <!doctype html>
 <html lang="en">
@@ -63,9 +44,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dose Round Tab — BestDOSE</title>
 <style>
-  /* ---- Design tokens (subset used on this screen — full set in design-tokens.md) ---- */
+  /* ---- Design tokens (subset — full set in design-tokens.md) ---- */
   :root {
-    /* Colour — text */
     --text-primary: #181D27;
     --text-secondary: #414651;
     --text-tertiary: #535862;
@@ -74,40 +54,33 @@
     --text-brand-primary: #003B95;
     --text-error-primary: #CD1719;
 
-    /* Colour — border */
     --border-primary: #D0D4DC;
     --border-secondary: #EEEFF2;
     --border-disabled: #D0D4DC;
+    --border-brand: #003B95;
     --border-error: #CD1719;
 
-    /* Colour — background */
     --bg-primary: #FFFFFF;
     --bg-secondary: #F7F7F9;
     --bg-tertiary: #EEEFF2;
     --bg-disabled: #EEEFF2;
+    --bg-brand-primary: #E0EEFF;
+    --bg-brand-solid: #003B95;
+    --bg-brand-solid_hover: #022664;
     --bg-error-primary: #F8E7E9;
 
-    /* Medication classification (BESTMED-specific, clinical meaning — do not alter) */
+    /* Medication classification (BESTMED-specific, exempt from v3) */
     --color-med-cytotoxic: #3B0944;
-    --color-med-hazardous: #A500A8;
     --color-med-warfarin: #FAEE5A;
     --color-med-insulin: #B2704E;
-    --color-med-s8: #067242;
 
-    /* Typography */
     --font-family-base: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    --text-xs: 12px;
-    --text-xs-lh: 18px;
-    --text-sm: 14px;
-    --text-sm-lh: 20px;
-    --text-md: 16px;
-    --text-md-lh: 24px;
-    --text-lg: 18px;
-    --text-lg-lh: 28px;
-    --display-xs: 24px;
-    --display-xs-lh: 32px;
+    --text-xs: 12px;  --text-xs-lh: 18px;
+    --text-sm: 14px;  --text-sm-lh: 20px;
+    --text-md: 16px;  --text-md-lh: 24px;
+    --text-lg: 18px;  --text-lg-lh: 28px;
+    --display-xs: 24px; --display-xs-lh: 32px;
 
-    /* Spacing */
     --spacing-xxs: 2px;
     --spacing-xs: 4px;
     --spacing-sm: 6px;
@@ -118,13 +91,11 @@
     --spacing-3xl: 24px;
     --spacing-4xl: 32px;
 
-    /* Radius */
-    --radius-xxs: 2px;
-    --radius-xs: 4px;
+    --radius-sm: 6px;
     --radius-md: 8px;
     --radius-2xl: 16px;
+    --radius-full: 9999px;
 
-    /* Shadow */
     --shadow-sm: 0 1px 6px rgba(0,0,0,0.1);
   }
 
@@ -137,339 +108,174 @@
   }
 
   .visually-hidden {
-    position: absolute;
-    width: 1px; height: 1px;
-    padding: 0; margin: -1px;
-    overflow: hidden;
-    clip: rect(0,0,0,0);
-    white-space: nowrap;
-    border: 0;
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
   }
 
   .skip-link {
-    position: absolute;
-    left: var(--spacing-md);
-    top: -48px;
-    background: var(--bg-brand-solid, #003B95);
-    color: var(--text-white);
+    position: absolute; left: var(--spacing-md); top: -48px;
+    background: var(--bg-brand-solid); color: var(--text-white);
     padding: var(--spacing-md) var(--spacing-lg);
-    border-radius: var(--radius-xs);
-    z-index: 10;
+    border-radius: var(--radius-md); z-index: 10;
     transition: top 0.15s ease;
   }
   .skip-link:focus { top: var(--spacing-md); }
-  @media (prefers-reduced-motion: reduce) {
-    .skip-link { transition: none; }
-  }
+  @media (prefers-reduced-motion: reduce) { .skip-link { transition: none; } }
 
-  /* ---- Back bar ---- */
+  /* ====== Button — components.md v3 ====== */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: var(--spacing-xs);
+    border-radius: var(--radius-md);              /* v3: 8px all sizes */
+    font-family: inherit; font-weight: 600;
+    cursor: pointer; border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .btn--sm { height: 36px; padding: 8px 12px;  font-size: var(--text-sm); }
+  .btn--md { height: 40px; padding: 10px 14px; font-size: var(--text-sm); }
+  .btn--lg { height: 44px; padding: 10px 16px; font-size: var(--text-md); }
+  .btn--xl { height: 48px; padding: 12px 18px; font-size: var(--text-md); }
+  .btn--primary { background: var(--bg-brand-solid); color: var(--text-white); border-color: var(--bg-brand-solid); }
+  .btn--primary:hover { background: var(--bg-brand-solid_hover); border-color: var(--bg-brand-solid_hover); }
+  .btn--secondary { background: var(--bg-primary); color: var(--text-brand-primary); border-color: var(--border-primary); }
+  .btn--secondary:hover { background: var(--bg-tertiary); }
+  .btn:focus-visible { outline: 2px solid var(--text-brand-primary); outline-offset: 2px; }
+
+  /* ====== Badge — components.md v3 ====== */
+  .badge {
+    display: inline-flex; align-items: center; gap: var(--spacing-xs);
+    font-weight: 600; white-space: nowrap;
+  }
+  .badge--sm { height: 22px; padding: 2px 8px;  font-size: var(--text-xs); }
+  .badge--md { height: 24px; padding: 2px 10px; font-size: var(--text-xs); }
+  .badge--lg { height: 28px; padding: 4px 12px; font-size: var(--text-sm); }
+  .badge--pill { border-radius: var(--radius-full); }
+  .badge--badge { border-radius: var(--radius-sm); }
+  /* Gray base (v3 confirmed variant) — used as the neutral carrier for a clinical dot */
+  .badge--gray {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary);
+  }
+  /* Error-styled tag (Unusual Dose, Restrictive Practice) — v3 error variant not yet
+     extracted; colour pairing from design-tokens.md, flag #2 */
+  .badge--error {
+    background: var(--bg-error-primary);
+    border: 1px solid var(--border-error);
+    color: var(--text-error-primary);
+  }
+  .badge__dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    border: 1px solid var(--border-primary); flex-shrink: 0;
+  }
+  .badge__dot--cytotoxic { background: var(--color-med-cytotoxic); }
+  .badge__dot--warfarin  { background: var(--color-med-warfarin); }
+  .badge__dot--insulin   { background: var(--color-med-insulin); }
+
+  /* ---- Back bar (contextual chrome, section III) ---- */
   .back-bar {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-lg);
+    display: flex; align-items: center; gap: var(--spacing-lg);
     padding: var(--spacing-lg) var(--spacing-xl);
     background: var(--bg-primary);
     border-bottom: 1px solid var(--border-secondary);
   }
   .back-bar__button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    border: none;
-    background: transparent;
-    border-radius: var(--radius-xs);
-    color: var(--text-primary);
-    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border: none; background: transparent;
+    border-radius: var(--radius-md); color: var(--text-primary); cursor: pointer;
   }
   .back-bar__button:hover { background: var(--bg-tertiary); }
   .back-bar__button:focus-visible { outline: 2px solid var(--text-brand-primary); outline-offset: 2px; }
   .back-bar__title {
-    flex: 1;
-    text-align: center;
-    font-size: var(--text-lg);
-    line-height: var(--text-lg-lh);
-    font-weight: 600;
-    margin: 0;
-    margin-right: 44px; /* balances back button width so title stays visually centred */
+    flex: 1; text-align: center; margin: 0; margin-right: 44px;
+    font-size: var(--text-lg); line-height: var(--text-lg-lh); font-weight: 600;
   }
 
-  /* ---- Resident record tab nav (Dose Round / OBS / Emergency Stock / Medication Chart) ---- */
-  .resident-tabs {
-    background: var(--bg-primary);
-    border-bottom: 1px solid var(--border-secondary);
-  }
-  .resident-tabs__list {
-    display: flex;
-    list-style: none;
-    margin: 0;
-    padding: 0 var(--spacing-xl);
-    gap: var(--spacing-3xl);
-  }
+  /* ---- Resident record tab nav (Tabs not yet extracted in v3 — placeholder) ---- */
+  .resident-tabs { background: var(--bg-primary); border-bottom: 1px solid var(--border-secondary); }
+  .resident-tabs__list { display: flex; list-style: none; margin: 0; padding: 0 var(--spacing-xl); gap: var(--spacing-3xl); }
   .resident-tabs__link {
-    display: inline-block;
-    padding: var(--spacing-lg) var(--spacing-xs);
-    font-size: var(--text-md);
-    line-height: var(--text-md-lh);
-    color: var(--text-secondary);
-    text-decoration: none;
+    display: inline-block; padding: var(--spacing-lg) var(--spacing-xs);
+    font-size: var(--text-md); line-height: var(--text-md-lh);
+    color: var(--text-secondary); text-decoration: none;
     border-bottom: 3px solid transparent;
   }
   .resident-tabs__link:focus-visible { outline: 2px solid var(--text-brand-primary); outline-offset: 2px; }
-  .resident-tabs__link--active {
-    color: var(--text-brand-primary);
-    border-bottom-color: var(--text-brand-primary);
-    font-weight: 600;
-  }
+  .resident-tabs__link--active { color: var(--text-brand-primary); border-bottom-color: var(--text-brand-primary); font-weight: 600; }
 
   /* ---- Dose Round Tab content ---- */
-  .dose-round-tab {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: var(--spacing-3xl) var(--spacing-xl);
-  }
-
+  .dose-round-tab { max-width: 1280px; margin: 0 auto; padding: var(--spacing-3xl) var(--spacing-xl); }
   .med-group + .med-group { margin-top: var(--spacing-4xl); }
-  .med-group__title {
-    font-size: var(--display-xs);
-    line-height: var(--display-xs-lh);
-    font-weight: 600;
-    margin: 0 0 var(--spacing-lg);
-  }
-
+  .med-group__title { font-size: var(--display-xs); line-height: var(--display-xs-lh); font-weight: 600; margin: 0 0 var(--spacing-lg); }
   .med-subgroup + .med-subgroup { margin-top: var(--spacing-3xl); }
-  .med-subgroup__title {
-    font-size: var(--text-lg);
-    line-height: var(--text-lg-lh);
-    font-weight: 600;
-    margin: 0 0 var(--spacing-md);
-  }
+  .med-subgroup__title { font-size: var(--text-lg); line-height: var(--text-lg-lh); font-weight: 600; margin: 0 0 var(--spacing-md); }
 
   /* Conditional clinical alert banner (Pulse / BGL / INR required) */
   .med-alert-banner {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--spacing-md);
-    background: var(--bg-error-primary);
-    border-left: 4px solid var(--border-error);
-    border-radius: var(--radius-xs);
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-lg);
+    display: flex; align-items: flex-start; gap: var(--spacing-md);
+    background: var(--bg-error-primary); border-left: 4px solid var(--border-error);
+    border-radius: var(--radius-md); padding: var(--spacing-lg); margin-bottom: var(--spacing-lg);
   }
   .med-alert-banner__icon { flex-shrink: 0; width: 22px; height: 22px; color: var(--text-error-primary); }
-  .med-alert-banner__text {
-    margin: 0;
-    color: var(--text-error-primary);
-    font-size: var(--text-md);
-    line-height: var(--text-md-lh);
-    font-weight: 600;
+  .med-alert-banner__text { margin: 0; color: var(--text-error-primary); font-size: var(--text-md); line-height: var(--text-md-lh); font-weight: 600; }
+  .med-alert-banner__control { display: flex; align-items: center; gap: var(--spacing-md); margin-top: var(--spacing-md); flex-wrap: wrap; }
+  /* Input — v3 Medium: 44px, radius 8px, padding 10/14 */
+  .input-control {
+    height: 44px; padding: 10px 14px;
+    border: 1px solid var(--border-primary); border-radius: var(--radius-md);
+    font-family: inherit; font-size: var(--text-md); background: var(--bg-primary); color: var(--text-primary);
   }
-  .med-alert-banner__control {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-md);
-  }
-  .med-alert-banner__input {
-    height: 44px;
-    padding: 0 var(--spacing-lg);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-xs);
-    font-size: var(--text-md);
-    font-family: inherit;
-    width: 120px;
-  }
-  .med-alert-banner__input:focus-visible { outline: 2px solid var(--text-brand-primary); outline-offset: 1px; }
+  .input-control:focus-visible { outline: 2px solid var(--text-brand-primary); outline-offset: 1px; }
+  .med-alert-banner__input { width: 120px; }
 
-  /* Medication table */
+  /* ====== Table — components.md v3: 72px rows, cell padding 16/24 ====== */
   .med-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: var(--bg-primary);
-    border: 1px solid var(--border-secondary);
-    border-radius: var(--radius-md);
-    overflow: hidden;
+    width: 100%; border-collapse: collapse;
+    background: var(--bg-primary); border: 1px solid var(--border-secondary);
+    border-radius: var(--radius-md); overflow: hidden;
   }
-  .med-table th,
-  .med-table td {
-    text-align: left;
-    padding: var(--spacing-lg);
+  .med-table th, .med-table td {
+    text-align: left; padding: 16px 24px;         /* v3 cell padding */
     border-bottom: 1px solid var(--border-secondary);
-    vertical-align: top;
-    font-size: var(--text-md);
-    line-height: var(--text-md-lh);
+    vertical-align: middle; font-size: var(--text-md); line-height: var(--text-md-lh);
   }
-  .med-table tbody tr:last-child th,
-  .med-table tbody tr:last-child td { border-bottom: none; }
+  .med-table tbody tr { height: 72px; }           /* v3 row height */
+  .med-table tbody tr:last-child th, .med-table tbody tr:last-child td { border-bottom: none; }
   .med-table thead th {
-    background: var(--bg-tertiary);
-    font-size: var(--text-sm);
-    line-height: var(--text-sm-lh);
-    font-weight: 600;
-    color: var(--text-secondary);
+    height: auto; background: var(--bg-tertiary);
+    font-size: var(--text-sm); line-height: var(--text-sm-lh);
+    font-weight: 600; color: var(--text-secondary);
   }
 
-  .med-cell {
-    display: flex;
-    gap: var(--spacing-lg);
-  }
-  .med-cell__image {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-xs);
-    background: var(--bg-tertiary);
-    flex-shrink: 0;
-    object-fit: cover;
-  }
+  .med-cell { display: flex; gap: var(--spacing-lg); align-items: flex-start; }
+  .med-cell__image { width: 40px; height: 40px; border-radius: var(--radius-md); background: var(--bg-tertiary); flex-shrink: 0; object-fit: cover; }
   .med-cell__body { min-width: 0; }
-  .med-cell__name {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    font-weight: 600;
-    flex-wrap: wrap;
-  }
-  .med-cell__directions {
-    margin: var(--spacing-xxs) 0 0;
-    color: var(--text-tertiary);
-    font-size: var(--text-sm);
-    line-height: var(--text-sm-lh);
-  }
-  .med-cell__tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-xs);
-    margin-top: var(--spacing-xs);
-  }
+  .med-cell__name { display: flex; align-items: center; gap: var(--spacing-xs); font-weight: 600; flex-wrap: wrap; }
+  .med-cell__directions { margin: var(--spacing-xxs) 0 0; color: var(--text-tertiary); font-size: var(--text-sm); line-height: var(--text-sm-lh); }
+  .med-cell__tags { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); margin-top: var(--spacing-xs); }
 
-  /* Icon + visually-hidden text alternative pattern used throughout */
   .med-icon { width: 18px; height: 18px; flex-shrink: 0; }
-  .med-icon--do-not-crush,
-  .med-icon--complex-alert { color: var(--text-error-primary); }
+  .med-icon--do-not-crush, .med-icon--complex-alert { color: var(--text-error-primary); }
   .med-icon--dual-sign { color: var(--text-brand-primary); }
 
-  /* Medication classification badge — outline style, see flag #3/#4 above */
-  .med-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    height: 26px;
-    padding: var(--spacing-xxs) var(--spacing-md);
-    border-radius: var(--radius-2xl);
-    border: 1px solid var(--border-primary);
-    background: var(--bg-primary);
-    font-size: var(--text-xs);
-    line-height: var(--text-xs-lh);
-    font-weight: 600;
-    color: var(--text-primary);
-    white-space: nowrap;
-  }
-  .med-badge__swatch {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    border: 1px solid var(--border-primary);
-    flex-shrink: 0;
-  }
-  .med-badge--cytotoxic .med-badge__swatch { background: var(--color-med-cytotoxic); }
-  .med-badge--hazardous .med-badge__swatch { background: var(--color-med-hazardous); }
-  .med-badge--warfarin .med-badge__swatch { background: var(--color-med-warfarin); }
-  .med-badge--insulin .med-badge__swatch { background: var(--color-med-insulin); }
-  .med-badge--s8 .med-badge__swatch { background: var(--color-med-s8); }
+  .med-table__reason { width: 100%; min-width: 160px; }
+  .med-table__reason:disabled { background: var(--bg-disabled); color: var(--text-disabled); border-color: var(--border-disabled); }
+  .med-table__given { width: 100%; min-width: 100px; }
 
-  /* Non-colour text tags (Unusual Dose, Restrictive Practice) */
-  .med-tag {
-    display: inline-flex;
-    align-items: center;
-    height: 26px;
-    padding: var(--spacing-xxs) var(--spacing-md);
-    border-radius: var(--radius-2xl);
-    border: 1px solid var(--border-error);
-    background: var(--bg-error-primary);
-    color: var(--text-error-primary);
-    font-size: var(--text-xs);
-    line-height: var(--text-xs-lh);
-    font-weight: 600;
-    white-space: nowrap;
-  }
-
-  /* Reason select */
-  .med-table__reason {
-    height: 44px;
-    width: 100%;
-    min-width: 160px;
-    padding: 0 var(--spacing-lg);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-xs);
-    font-family: inherit;
-    font-size: var(--text-sm);
-    color: var(--text-primary);
-    background: var(--bg-primary);
-  }
-  .med-table__reason:disabled {
-    background: var(--bg-disabled);
-    color: var(--text-disabled);
-    border-color: var(--border-disabled);
-  }
-  .med-table__reason:focus-visible { outline: 2px solid var(--text-brand-primary); outline-offset: 1px; }
-
-  /* Given (free text) field for Variable Dose */
-  .med-table__given {
-    height: 44px;
-    width: 100%;
-    min-width: 100px;
-    padding: 0 var(--spacing-lg);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-xs);
-    font-family: inherit;
-    font-size: var(--text-sm);
-  }
-  .med-table__given:focus-visible { outline: 2px solid var(--text-brand-primary); outline-offset: 1px; }
-
-  /* Admin checkbox — padded label increases hit area, see flag #10 */
-  .med-table__admin-label {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--spacing-lg);
-    margin: calc(var(--spacing-lg) * -1);
-    cursor: pointer;
-  }
-  .med-table__admin-checkbox {
-    width: 22px;
-    height: 22px;
-    accent-color: var(--text-brand-primary);
-  }
+  .med-table__admin-label { display: flex; align-items: center; justify-content: center; padding: var(--spacing-lg); margin: calc(var(--spacing-lg) * -1); cursor: pointer; }
+  .med-table__admin-checkbox { width: 22px; height: 22px; accent-color: var(--text-brand-primary); }
   .med-table__admin-checkbox:focus-visible { outline: 2px solid var(--text-brand-primary); outline-offset: 2px; }
 
   .col-admin, .col-reason { width: 1%; white-space: nowrap; }
   .col-admin { text-align: center; }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 38px;
-    padding: var(--spacing-md) var(--spacing-xl);
-    border-radius: var(--radius-xxs);
-    border: 1px solid var(--text-brand-primary);
-    background: var(--bg-primary);
-    color: var(--text-brand-primary);
-    font-family: inherit;
-    font-size: var(--text-sm);
-    font-weight: 600;
-    cursor: pointer;
-  }
-  .btn:hover { background: var(--bg-tertiary); }
-  .btn:focus-visible { outline: 2px solid var(--text-brand-primary); outline-offset: 2px; }
 </style>
 </head>
 <body>
 
 <a class="skip-link" href="#dose-round-tab-content">Skip to medication list</a>
 
-<!-- Back bar: component context from section III, not itself part of section IV -->
+<!-- Back bar: contextual chrome from section III -->
 <header class="back-bar">
   <button type="button" class="back-bar__button" aria-label="Back to Dose Rounds">
     <svg class="med-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -479,7 +285,7 @@
   <h1 class="back-bar__title">Main Dose Round &mdash; 08:00 (20/07)</h1>
 </header>
 
-<!-- Resident record tab nav: component context from section III -->
+<!-- Resident record tab nav: contextual chrome from section III -->
 <nav class="resident-tabs" aria-label="Resident record sections">
   <ul class="resident-tabs__list">
     <li><a class="resident-tabs__link resident-tabs__link--active" href="#" aria-current="page">Dose Round</a></li>
@@ -492,8 +298,8 @@
 <!-- Dose Round Tab (section IV) -->
 <main class="dose-round-tab" id="dose-round-tab-content">
 
-  <!-- Packed meds — always displayed above Non-Packed per spec -->
-  <section class="med-group med-group--packed" aria-labelledby="packed-heading">
+  <!-- Packed meds — always above Non-Packed per spec -->
+  <section class="med-group" aria-labelledby="packed-heading">
     <h2 class="med-group__title" id="packed-heading">Packed</h2>
     <table class="med-table">
       <caption class="visually-hidden">Packed medications for this dose round</caption>
@@ -521,18 +327,12 @@
           <td>0800, 1300, 1800 (2 tabs)</td>
           <td class="col-reason">
             <label class="visually-hidden" for="reason-panadol">Reason for Panadol Osteo 665mg</label>
-            <select class="med-table__reason" id="reason-panadol">
+            <select class="input-control med-table__reason" id="reason-panadol">
               <option value="">&ndash;</option>
-              <option>Absent</option>
-              <option>Ceased</option>
-              <option>Fasting</option>
-              <option>Hospital</option>
-              <option>No Stock</option>
-              <option>Omitted</option>
-              <option>Refused</option>
-              <option>Self Administered</option>
-              <option>Social Leave</option>
-              <option>Withheld</option>
+              <option>Absent</option><option>Ceased</option><option>Fasting</option>
+              <option>Hospital</option><option>No Stock</option><option>Omitted</option>
+              <option>Refused</option><option>Self Administered</option>
+              <option>Social Leave</option><option>Withheld</option>
             </select>
           </td>
           <td class="col-admin">
@@ -549,8 +349,8 @@
               <div class="med-cell__body">
                 <div class="med-cell__name">
                   Warfarin 5mg
-                  <span class="med-badge med-badge--warfarin">
-                    <span class="med-badge__swatch"></span>Warfarin
+                  <span class="badge badge--pill badge--md badge--gray">
+                    <span class="badge__dot badge__dot--warfarin"></span>Warfarin
                   </span>
                 </div>
                 <p class="med-cell__directions">Take as directed</p>
@@ -561,18 +361,12 @@
           <td>1700 (1 tab)</td>
           <td class="col-reason">
             <label class="visually-hidden" for="reason-warfarin">Reason for Warfarin 5mg</label>
-            <select class="med-table__reason" id="reason-warfarin">
+            <select class="input-control med-table__reason" id="reason-warfarin">
               <option value="">&ndash;</option>
-              <option>Absent</option>
-              <option>Ceased</option>
-              <option>Fasting</option>
-              <option>Hospital</option>
-              <option>No Stock</option>
-              <option>Omitted</option>
-              <option>Refused</option>
-              <option>Self Administered</option>
-              <option>Social Leave</option>
-              <option>Withheld</option>
+              <option>Absent</option><option>Ceased</option><option>Fasting</option>
+              <option>Hospital</option><option>No Stock</option><option>Omitted</option>
+              <option>Refused</option><option>Self Administered</option>
+              <option>Social Leave</option><option>Withheld</option>
             </select>
           </td>
           <td class="col-admin">
@@ -586,8 +380,8 @@
     </table>
   </section>
 
-  <!-- Non-Packed: Regular Medication, Variable Dose Medications, Insulin (in that order) -->
-  <section class="med-group med-group--non-packed" aria-labelledby="non-packed-heading">
+  <!-- Non-Packed: Regular, Variable, Insulin (in that order) -->
+  <section class="med-group" aria-labelledby="non-packed-heading">
     <h2 class="med-group__title" id="non-packed-heading">Non-Packed</h2>
 
     <section class="med-subgroup" aria-labelledby="regular-heading">
@@ -602,10 +396,9 @@
           <p class="med-alert-banner__text">Pulse check required prior to administration</p>
           <div class="med-alert-banner__control">
             <label for="pulse-value">Pulse rate</label>
-            <input type="text" inputmode="numeric" id="pulse-value" class="med-alert-banner__input" aria-describedby="pulse-hint">
-            <button type="button" class="btn">Record Pulse</button>
+            <input type="text" inputmode="numeric" id="pulse-value" class="input-control med-alert-banner__input">
+            <button type="button" class="btn btn--lg btn--primary">Record Pulse</button>
           </div>
-          <p id="pulse-hint" class="visually-hidden">Enter pulse rate before administering Digoxin</p>
         </div>
       </div>
 
@@ -628,13 +421,9 @@
                 <div class="med-cell__body">
                   <div class="med-cell__name">
                     Digoxin 125mcg
-                    <svg class="med-icon med-icon--do-not-crush" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                      <circle cx="12" cy="12" r="9"/><line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
+                    <svg class="med-icon med-icon--do-not-crush" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     <span class="visually-hidden">Do not crush</span>
-                    <svg class="med-icon med-icon--complex-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                      <path d="M12 9v4m0 4h.01M10.3 3.9L2.6 17a2 2 0 001.7 3h15.4a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    <svg class="med-icon med-icon--complex-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 9v4m0 4h.01M10.3 3.9L2.6 17a2 2 0 001.7 3h15.4a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     <span class="visually-hidden">Complex medication alert</span>
                   </div>
                   <p class="med-cell__directions">Take once daily</p>
@@ -645,18 +434,12 @@
             <td>0800 (1 tab)</td>
             <td class="col-reason">
               <label class="visually-hidden" for="reason-digoxin">Reason for Digoxin 125mcg</label>
-              <select class="med-table__reason" id="reason-digoxin">
+              <select class="input-control med-table__reason" id="reason-digoxin">
                 <option value="">&ndash;</option>
-                <option>Absent</option>
-                <option>Ceased</option>
-                <option>Fasting</option>
-                <option>Hospital</option>
-                <option>No Stock</option>
-                <option>Omitted</option>
-                <option>Refused</option>
-                <option>Self Administered</option>
-                <option>Social Leave</option>
-                <option>Withheld</option>
+                <option>Absent</option><option>Ceased</option><option>Fasting</option>
+                <option>Hospital</option><option>No Stock</option><option>Omitted</option>
+                <option>Refused</option><option>Self Administered</option>
+                <option>Social Leave</option><option>Withheld</option>
               </select>
             </td>
             <td class="col-admin">
@@ -674,7 +457,7 @@
                   <div class="med-cell__name">Prednisolone 5mg</div>
                   <p class="med-cell__directions">Take as directed</p>
                   <div class="med-cell__tags">
-                    <span class="med-tag">Unusual Dose</span>
+                    <span class="badge badge--badge badge--md badge--error">Unusual Dose</span>
                   </div>
                 </div>
               </div>
@@ -683,7 +466,7 @@
             <td>0800 (2 tabs)</td>
             <td class="col-reason">
               <label class="visually-hidden" for="reason-prednisolone">Reason for Prednisolone 5mg</label>
-              <select class="med-table__reason" id="reason-prednisolone" disabled>
+              <select class="input-control med-table__reason" id="reason-prednisolone" disabled>
                 <option selected>Self Administered</option>
               </select>
             </td>
@@ -701,12 +484,10 @@
                 <div class="med-cell__body">
                   <div class="med-cell__name">
                     Methotrexate 2.5mg
-                    <span class="med-badge med-badge--cytotoxic">
-                      <span class="med-badge__swatch"></span>Cytotoxic
+                    <span class="badge badge--pill badge--md badge--gray">
+                      <span class="badge__dot badge__dot--cytotoxic"></span>Cytotoxic
                     </span>
-                    <svg class="med-icon med-icon--dual-sign" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                      <path d="M9 12l2 2 4-4M9 17l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    <svg class="med-icon med-icon--dual-sign" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 12l2 2 4-4M9 17l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     <span class="visually-hidden">Dual signature required</span>
                   </div>
                   <p class="med-cell__directions">Take once weekly</p>
@@ -717,18 +498,12 @@
             <td>0800 (1 tab)</td>
             <td class="col-reason">
               <label class="visually-hidden" for="reason-methotrexate">Reason for Methotrexate 2.5mg</label>
-              <select class="med-table__reason" id="reason-methotrexate">
+              <select class="input-control med-table__reason" id="reason-methotrexate">
                 <option value="">&ndash;</option>
-                <option>Absent</option>
-                <option>Ceased</option>
-                <option>Fasting</option>
-                <option>Hospital</option>
-                <option>No Stock</option>
-                <option>Omitted</option>
-                <option>Refused</option>
-                <option>Self Administered</option>
-                <option>Social Leave</option>
-                <option>Withheld</option>
+                <option>Absent</option><option>Ceased</option><option>Fasting</option>
+                <option>Hospital</option><option>No Stock</option><option>Omitted</option>
+                <option>Refused</option><option>Self Administered</option>
+                <option>Social Leave</option><option>Withheld</option>
               </select>
             </td>
             <td class="col-admin">
@@ -754,10 +529,9 @@
           <p class="med-alert-banner__text">INR reading required prior to administration</p>
           <div class="med-alert-banner__control">
             <label for="inr-value">INR reading</label>
-            <input type="text" inputmode="decimal" id="inr-value" class="med-alert-banner__input">
-            <!-- Spec text is truncated here ("The 'View INR History' button will be, AND") — flagging as
-                 incomplete source content rather than guessing the missing requirement. -->
-            <button type="button" class="btn">View INR History</button>
+            <input type="text" inputmode="decimal" id="inr-value" class="input-control med-alert-banner__input">
+            <!-- Spec truncated: "The 'View INR History' button will be, AND" — flag #7 -->
+            <button type="button" class="btn btn--lg btn--secondary">View INR History</button>
           </div>
         </div>
       </div>
@@ -789,22 +563,16 @@
             <td>As per sliding scale</td>
             <td>
               <label class="visually-hidden" for="given-warfarin-var">Given dose for Warfarin variable dose</label>
-              <input type="text" inputmode="decimal" id="given-warfarin-var" class="med-table__given">
+              <input type="text" inputmode="decimal" id="given-warfarin-var" class="input-control med-table__given">
             </td>
             <td class="col-reason">
               <label class="visually-hidden" for="reason-warfarin-var">Reason for Warfarin variable dose</label>
-              <select class="med-table__reason" id="reason-warfarin-var">
+              <select class="input-control med-table__reason" id="reason-warfarin-var">
                 <option value="">&ndash;</option>
-                <option>Absent</option>
-                <option>Ceased</option>
-                <option>Fasting</option>
-                <option>Hospital</option>
-                <option>No Stock</option>
-                <option>Omitted</option>
-                <option>Refused</option>
-                <option>Self Administered</option>
-                <option>Social Leave</option>
-                <option>Withheld</option>
+                <option>Absent</option><option>Ceased</option><option>Fasting</option>
+                <option>Hospital</option><option>No Stock</option><option>Omitted</option>
+                <option>Refused</option><option>Self Administered</option>
+                <option>Social Leave</option><option>Withheld</option>
               </select>
             </td>
             <td class="col-admin">
@@ -830,14 +598,12 @@
           <p class="med-alert-banner__text">BGL required prior to administration</p>
           <div class="med-alert-banner__control">
             <label for="bgl-value">BGL (mmol/L)</label>
-            <input type="text" inputmode="decimal" id="bgl-value" class="med-alert-banner__input">
-            <button type="button" class="btn">Record BGL</button>
+            <input type="text" inputmode="decimal" id="bgl-value" class="input-control med-alert-banner__input">
+            <button type="button" class="btn btn--lg btn--primary">Record BGL</button>
           </div>
         </div>
       </div>
 
-      <!-- Column structure follows the Regular Medication table — Insulin has no separately
-           spec'd column set in section IV; approximated, flag #5 above. -->
       <table class="med-table">
         <caption class="visually-hidden">Insulin, non-packed</caption>
         <thead>
@@ -857,12 +623,10 @@
                 <div class="med-cell__body">
                   <div class="med-cell__name">
                     Actrapid Insulin
-                    <span class="med-badge med-badge--insulin">
-                      <span class="med-badge__swatch"></span>Insulin
+                    <span class="badge badge--pill badge--md badge--gray">
+                      <span class="badge__dot badge__dot--insulin"></span>Insulin
                     </span>
-                    <svg class="med-icon med-icon--dual-sign" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                      <path d="M9 12l2 2 4-4M9 17l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    <svg class="med-icon med-icon--dual-sign" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 12l2 2 4-4M9 17l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     <span class="visually-hidden">Dual signature required</span>
                   </div>
                   <p class="med-cell__directions">Per sliding scale</p>
@@ -873,18 +637,12 @@
             <td>Sliding scale</td>
             <td class="col-reason">
               <label class="visually-hidden" for="reason-insulin">Reason for Actrapid Insulin</label>
-              <select class="med-table__reason" id="reason-insulin">
+              <select class="input-control med-table__reason" id="reason-insulin">
                 <option value="">&ndash;</option>
-                <option>Absent</option>
-                <option>Ceased</option>
-                <option>Fasting</option>
-                <option>Hospital</option>
-                <option>No Stock</option>
-                <option>Omitted</option>
-                <option>Refused</option>
-                <option>Self Administered</option>
-                <option>Social Leave</option>
-                <option>Withheld</option>
+                <option>Absent</option><option>Ceased</option><option>Fasting</option>
+                <option>Hospital</option><option>No Stock</option><option>Omitted</option>
+                <option>Refused</option><option>Self Administered</option>
+                <option>Social Leave</option><option>Withheld</option>
               </select>
             </td>
             <td class="col-admin">

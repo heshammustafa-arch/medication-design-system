@@ -1,60 +1,46 @@
 <!--
   Screen: IV — [BCP App] Dose Round Tab — OMITTED STATES
-  Companion to output/dose-round-tab.html. Builds the states that the base
-  screen deliberately left out (flags #5, #6, #7 in that file):
-    A. Closed / past dose round table state
-    B. Confirmation modal (standard + dosage-mismatch warning variant)
-    C. Secondary Authentication / Dual Sign modal
-    D. BGL Reading Required modal
-    E. Insulin Sliding Scale Directions modal (+ expanded "Reason For Change" state)
-    F. View BGL History modal (table)
-    G. View INR History modal (table)
-    H. COVID-19 vaccine not-supported pop-up
-    I. Confirm Incident Report modal
+  Rebuilt against components.md v3. Companion to output/dose-round-tab.html.
+  Builds: A closed/past-round table, B–I the modals triggered from the tab.
 
-  ---- LAYOUT ----
-  This is a STATES SHOWCASE, not a runtime screen. No-JS is a hard project
-  constraint and modal open/close, focus-trap, Esc-to-close and return-focus are
-  Angular's responsibility. Each modal is therefore rendered statically "as open"
-  on its own backdrop stage with a caption, so engineering can read the markup for
-  every state without a stack of fixed overlays fighting for the viewport. In
-  production each .modal-stage becomes a single fixed, centred overlay.
+  ==== v3 MODAL PATTERN APPLIED (confirmation dialog, "Stacked left aligned") ====
+  Outer 400px, radius --radius-2xl (16px), close 44×44px top-right. Header 24px
+  padding / 16px internal gap, 48×48px featured icon stacked ABOVE title+description
+  (left-aligned), 20px header bottom padding, 1px full-width divider below. Actions
+  footer 32px top padding, buttons horizontal 12px gap, width content-driven.
+  Applies to the 5 confirmation/alert modals: B Confirm Administration, C Secondary
+  Authentication, D BGL Required, H COVID, I Confirm Incident Report.
 
-  ---- MODAL GEOMETRY ----
-  Shell tokens ARE documented in components.md and used exactly:
-    Small 368px / Medium 568px / Large 768px; padding --spacing-3xl (24px);
-    radius --radius-xs (4px); internal gap --spacing-xl (16px). "Form + warning"
-    variant = 768px, taller default. Height is content-driven.
-  The INTERNAL layout of each sub-pattern (dual-sign fields, confirmation body,
-  history tables) was NOT individually extracted — components.md says "pull on
-  demand." These internals are constructed from the section IV/VIII spec text, not
-  from Figma. Confirm against Figma before treating internal spacing as final.
+  Two of those (C, D) carry FORM fields. v3 documents the confirmation pattern with
+  icon+title+description+actions only — no form-in-body variant. The form fields are
+  added in an OPTIONAL body slot between divider and actions. FLAG: this body slot is
+  an extension of the documented pattern, not itself a v3-extracted layout.
 
-  ---- SCOPE ----
-  DELIBERATELY NOT BUILT — AIN-only modals. Section V "AIN Record Administration"
-  is "Not Doing" for MVP ("AIN will not be able to access the app"), so these
-  AIN-triggered modals are out of scope:
-    - Min/Max dosing quantity modal
-    - Incorrect Administration Count warning modal
-    - RN-tick Secondary Authentication (the RN/EN dual-sign PIN modal IS built
-      below as (C) — same PIN pattern, but for in-scope dual-signing, not AIN entry)
+  ==== NON-CONFIRMATION MODALS (E, F, G) — NOT A DOCUMENTED v3 PATTERN ====
+  components.md v3: "other modal types in the library (centered photo, checkboxes,
+  file upload, etc.) follow different internal structures, extract separately if
+  needed." E Insulin Sliding Scale (form + warning) and F/G history tables are NOT
+  confirmation dialogs and do not fit the 400px pattern (a 4-col table won't). They
+  use a .modal--panel shell built from the SHARED v3 primitives only — radius
+  --radius-2xl (16px) and the 44×44px close button — at a wider width. FLAG: their
+  internal geometry (width, header, table density) is approximated and needs its own
+  Figma extraction before it can be called v3-accurate.
 
-  ---- SPEC DATA-QUALITY FLAGS ----
-  - (G) View INR History: the section IV spec line "The 'View INR History' button
-    will be, AND" is truncated in the source document. The button and a history
-    table are built by analogy to BGL History; the exact required columns for INR
-    history are unconfirmed pending the missing spec text.
-  - (I) Incident Report: section IV contains contradictory prose — "Do not support
-    'Incident Report Logged'" appears alongside a description of the confirm-modal
-    behaviour when it IS clicked. Built here because the closed-round state (A)
-    lists the button; flagging the contradiction rather than resolving it.
+  ==== OTHER v3 VALUES ====
+  - Button: radius 8px, sizes 36/40/44/48. Modal actions use Large (44px). Closed-round
+    row actions use Medium (40px) — flag: below the 44px touch minimum; acceptable for
+    a secondary read-only action but noted.
+  - Input: Medium 44px, radius 8px, padding 10/14.
+  - Table (A closed-round + history tables): 72px rows, cell padding 16/24.
 
-  ---- ACCESSIBILITY ----
-  role="dialog" + aria-modal="true" + aria-labelledby on every modal; close buttons
-  carry aria-label; primary clinical confirm actions use the Large (48px) button per
-  accessibility.md's default. Focus-trap / return-focus / Esc are JS behaviours the
-  markup exposes hooks for but cannot implement here (documented, not silently
-  skipped). Status-carrying colour is always paired with text.
+  ==== SCOPE / SPEC FLAGS (unchanged from prior build) ====
+  - AIN-only modals (min/max quantity, incorrect-admin-count, RN-tick secondary auth)
+    excluded — section V "Not Doing" for MVP. The RN/EN dual-sign PIN (C) IS in scope.
+  - G INR History: source spec line truncated; columns built by analogy to BGL.
+  - I Incident Report: section IV contains contradictory prose ("Do not support" vs.
+    describing the confirm behaviour) — flagged, not resolved.
+  - Focus-trap / Esc / return-focus are Angular JS behaviours; markup exposes the
+    hooks (role, aria-modal, aria-labelledby) but cannot implement them here.
 -->
 <!doctype html>
 <html lang="en">
@@ -63,7 +49,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dose Round Tab — Omitted States — BestDOSE</title>
 <style>
-  /* ---- Design tokens (subset — full set in design-tokens.md) ---- */
   :root {
     --text-primary: #181D27;
     --text-secondary: #414651;
@@ -88,10 +73,6 @@
     --bg-brand-solid: #003B95;
     --bg-brand-solid_hover: #022664;
     --bg-error-primary: #F8E7E9;
-    --bg-error-solid: #CD1719;
-    --bg-warning-primary: #FFFAEB;
-
-    --color-med-insulin: #B2704E;
 
     --font-family-base: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     --text-xs: 12px;  --text-xs-lh: 18px;
@@ -99,7 +80,6 @@
     --text-md: 16px;  --text-md-lh: 24px;
     --text-lg: 18px;  --text-lg-lh: 28px;
     --text-xl: 20px;  --text-xl-lh: 30px;
-    --display-xs: 24px; --display-xs-lh: 32px;
     --display-sm: 30px; --display-sm-lh: 38px;
 
     --spacing-xxs: 2px;
@@ -113,282 +93,139 @@
     --spacing-4xl: 32px;
     --spacing-6xl: 48px;
 
-    --radius-xxs: 2px;
-    --radius-xs: 4px;
+    --radius-sm: 6px;
     --radius-md: 8px;
     --radius-2xl: 16px;
+    --radius-full: 9999px;
 
     --shadow-lg: 0 4px 16px rgba(0,0,0,0.1);
 
-    /* Modal widths (components.md) */
-    --modal-width-sm: 368px;
-    --modal-width-md: 568px;
-    --modal-width-lg: 768px;
+    /* Confirmation modal width (v3) + panel width (not v3, flagged) */
+    --modal-width-confirmation: 400px;
+    --modal-width-panel: 640px;
   }
 
   * { box-sizing: border-box; }
   body {
-    margin: 0;
-    font-family: var(--font-family-base);
-    color: var(--text-primary);
-    background: var(--bg-secondary);
+    margin: 0; font-family: var(--font-family-base);
+    color: var(--text-primary); background: var(--bg-secondary);
     line-height: var(--text-md-lh);
   }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
-  .visually-hidden {
-    position: absolute; width: 1px; height: 1px;
-    padding: 0; margin: -1px; overflow: hidden;
-    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
-  }
-
-  /* ---- Showcase chrome (not part of the product) ---- */
-  .showcase {
-    max-width: 1024px;
-    margin: 0 auto;
-    padding: var(--spacing-6xl) var(--spacing-xl);
-  }
-  .showcase__title {
-    font-size: var(--display-sm);
-    line-height: var(--display-sm-lh);
-    font-weight: 700;
-    margin: 0 0 var(--spacing-md);
-  }
-  .showcase__intro {
-    color: var(--text-secondary);
-    font-size: var(--text-md);
-    margin: 0 0 var(--spacing-6xl);
-    max-width: 68ch;
-  }
+  /* ---- Showcase chrome (not product) ---- */
+  .showcase { max-width: 1024px; margin: 0 auto; padding: var(--spacing-6xl) var(--spacing-xl); }
+  .showcase__title { font-size: var(--display-sm); line-height: var(--display-sm-lh); font-weight: 700; margin: 0 0 var(--spacing-md); }
+  .showcase__intro { color: var(--text-secondary); font-size: var(--text-md); margin: 0 0 var(--spacing-6xl); max-width: 68ch; }
   .specimen { margin-bottom: var(--spacing-6xl); }
-  .specimen__label {
-    font-size: var(--text-lg);
-    line-height: var(--text-lg-lh);
-    font-weight: 600;
-    margin: 0 0 var(--spacing-xs);
-  }
-  .specimen__note {
-    color: var(--text-tertiary);
-    font-size: var(--text-sm);
-    margin: 0 0 var(--spacing-lg);
-    max-width: 68ch;
-  }
+  .specimen__label { font-size: var(--text-lg); line-height: var(--text-lg-lh); font-weight: 600; margin: 0 0 var(--spacing-xs); }
+  .specimen__note { color: var(--text-tertiary); font-size: var(--text-sm); margin: 0 0 var(--spacing-lg); max-width: 68ch; }
 
-  /* Backdrop stage — becomes a fixed centred overlay in production */
-  .modal-stage {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--spacing-4xl);
-    background: rgba(24, 29, 39, 0.55);
-    border-radius: var(--radius-md);
-    min-height: 240px;
-  }
+  .modal-stage { display: flex; align-items: center; justify-content: center; padding: var(--spacing-4xl); background: rgba(24,29,39,0.55); border-radius: var(--radius-md); min-height: 240px; }
 
-  /* ---- Modal component ---- */
+  /* ====== Button — v3 ====== */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--spacing-xs); border-radius: var(--radius-md); font-family: inherit; font-weight: 600; cursor: pointer; border: 1px solid transparent; white-space: nowrap; }
+  .btn--md { height: 40px; padding: 10px 14px; font-size: var(--text-sm); }
+  .btn--lg { height: 44px; padding: 10px 16px; font-size: var(--text-md); }
+  .btn--xl { height: 48px; padding: 12px 18px; font-size: var(--text-md); }
+  .btn--primary { background: var(--bg-brand-solid); color: var(--text-white); border-color: var(--bg-brand-solid); }
+  .btn--primary:hover { background: var(--bg-brand-solid_hover); border-color: var(--bg-brand-solid_hover); }
+  .btn--secondary { background: var(--bg-primary); color: var(--text-brand-primary); border-color: var(--border-primary); }
+  .btn--secondary:hover { background: var(--bg-tertiary); }
+  .btn:focus-visible { outline: 2px solid var(--text-brand-primary); outline-offset: 2px; }
+
+  /* ====== Modal — v3 confirmation pattern ====== */
   .modal {
     background: var(--bg-primary);
-    border-radius: var(--radius-xs);
-    padding: var(--spacing-3xl);
+    border-radius: var(--radius-2xl);          /* v3: 16px */
     box-shadow: var(--shadow-lg);
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xl);
+    position: relative;
   }
-  .modal--sm { max-width: var(--modal-width-sm); }
-  .modal--md { max-width: var(--modal-width-md); }
-  .modal--lg { max-width: var(--modal-width-lg); }
+  .modal--confirmation { max-width: var(--modal-width-confirmation); }   /* v3: 400px */
+  .modal--panel { max-width: var(--modal-width-panel); }                 /* NOT v3 — flagged */
 
-  .modal__header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--spacing-lg);
-  }
-  .modal__title {
-    margin: 0;
-    font-size: var(--text-xl);
-    line-height: var(--text-xl-lh);
-    font-weight: 600;
-  }
-  .modal__title--danger { color: var(--text-error-primary); }
   .modal__close {
-    flex-shrink: 0;
-    width: 40px; height: 40px;
-    border: none;
-    background: transparent;
-    border-radius: var(--radius-xs);
-    color: var(--text-tertiary);
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    position: absolute; top: 12px; right: 12px;
+    width: 44px; height: 44px;                  /* v3: 44×44 */
+    border: none; background: transparent; border-radius: var(--radius-md);
+    color: var(--text-tertiary); cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
   }
   .modal__close:hover { background: var(--bg-tertiary); }
   .modal__close:focus-visible { outline: 2px solid var(--text-brand-primary); outline-offset: 2px; }
 
-  .modal__body { display: flex; flex-direction: column; gap: var(--spacing-lg); }
-  .modal__body p { margin: 0; }
-  .modal__body p + p { margin-top: 0; }
-
-  .modal__footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--spacing-lg);
-    flex-wrap: wrap;
+  /* Header: featured icon stacked above title+description, left-aligned */
+  .modal__header {
+    display: flex; flex-direction: column; gap: var(--spacing-xl);   /* 16px internal gap */
+    padding: var(--spacing-3xl);                                     /* 24px */
+    padding-bottom: var(--spacing-2xl);                             /* 20px */
+    padding-right: 56px;                                            /* clear the close button */
   }
-
-  /* Med summary block reused inside confirmation-type modals */
-  .modal-med {
-    display: flex;
-    gap: var(--spacing-lg);
-    padding: var(--spacing-lg);
-    background: var(--bg-secondary);
-    border-radius: var(--radius-xs);
-  }
-  .modal-med__image {
-    width: 40px; height: 40px;
-    border-radius: var(--radius-xs);
-    background: var(--bg-tertiary);
+  .modal__icon {
+    width: 48px; height: 48px; border-radius: var(--radius-md);     /* featured icon 48×48 */
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--bg-brand-primary); color: var(--text-brand-primary);
     flex-shrink: 0;
   }
-  .modal-med__name { font-weight: 600; }
-  .modal-med__meta { color: var(--text-tertiary); font-size: var(--text-sm); margin-top: var(--spacing-xxs); }
+  .modal__icon--danger { background: var(--bg-error-primary); color: var(--text-error-primary); }
+  .modal__icon svg { width: 24px; height: 24px; }
+  .modal__text { display: flex; flex-direction: column; gap: var(--spacing-xs); }
+  .modal__title { margin: 0; font-size: var(--text-lg); line-height: var(--text-lg-lh); font-weight: 600; }
+  .modal__title--danger { color: var(--text-error-primary); }
+  .modal__description { margin: 0; color: var(--text-tertiary); font-size: var(--text-sm); line-height: var(--text-sm-lh); }
 
-  /* Inline warning strip inside a modal (dosage mismatch, unreviewed NIM, etc.) */
-  .modal-warning {
-    display: flex;
-    gap: var(--spacing-md);
-    align-items: flex-start;
-    padding: var(--spacing-lg);
-    background: var(--bg-error-primary);
-    border-left: 4px solid var(--border-error);
-    border-radius: var(--radius-xs);
-    color: var(--text-error-primary);
-    font-size: var(--text-sm);
-    line-height: var(--text-sm-lh);
-    font-weight: 600;
-  }
+  .modal__divider { height: 1px; width: 100%; background: var(--border-secondary); }
+
+  /* Optional body slot (form fields / warning / table). Extension for C, D, and panels. */
+  .modal__body { padding: var(--spacing-3xl); padding-bottom: 0; display: flex; flex-direction: column; gap: var(--spacing-lg); }
+  .modal__body p { margin: 0; }
+
+  /* Actions footer: 32px top padding, 12px gap, content-driven widths */
+  .modal__actions { display: flex; justify-content: flex-end; gap: var(--spacing-lg); padding: var(--spacing-3xl); padding-top: var(--spacing-4xl); flex-wrap: wrap; }
+
+  /* Panel header (non-v3) — simple title + close, no featured icon */
+  .modal__panel-header { padding: var(--spacing-3xl); padding-right: 56px; padding-bottom: var(--spacing-2xl); }
+  .modal__panel-header .modal__title { font-size: var(--text-xl); line-height: var(--text-xl-lh); }
+
+  /* Shared inner pieces */
+  .modal-warning { display: flex; gap: var(--spacing-md); align-items: flex-start; padding: var(--spacing-lg); background: var(--bg-error-primary); border-left: 4px solid var(--border-error); border-radius: var(--radius-md); color: var(--text-error-primary); font-size: var(--text-sm); line-height: var(--text-sm-lh); font-weight: 600; }
   .modal-warning__icon { flex-shrink: 0; width: 20px; height: 20px; }
 
-  /* Form controls inside modals */
-  .field { display: flex; flex-direction: column; gap: var(--spacing-xs); }
-  .field__label { font-size: var(--text-sm); font-weight: 600; color: var(--text-secondary); }
-  .field__control {
-    height: 48px;
-    padding: 0 var(--spacing-lg);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-xs);
-    font-family: inherit;
-    font-size: var(--text-md);
-    background: var(--bg-primary);
-    color: var(--text-primary);
-  }
-  .field__control:focus-visible { outline: 2px solid var(--text-brand-primary); outline-offset: 1px; }
-  textarea.field__control { height: auto; min-height: 88px; padding: var(--spacing-md) var(--spacing-lg); resize: vertical; }
-  .field__hint { font-size: var(--text-xs); color: var(--text-tertiary); }
-
-  /* Calculated / read-only value display */
-  .value-display {
-    padding: var(--spacing-lg);
-    background: var(--bg-brand-primary);
-    border-radius: var(--radius-xs);
-    font-size: var(--text-md);
-  }
+  .value-display { padding: var(--spacing-lg); background: var(--bg-brand-primary); border-radius: var(--radius-md); font-size: var(--text-md); }
   .value-display strong { font-size: var(--text-lg); }
 
-  /* History table inside a modal */
-  .history-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: var(--text-sm);
-  }
-  .history-table th, .history-table td {
-    text-align: left;
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-bottom: 1px solid var(--border-secondary);
-    vertical-align: top;
-  }
-  .history-table thead th {
-    background: var(--bg-tertiary);
-    font-weight: 600;
-    color: var(--text-secondary);
-  }
+  /* Input — v3 Medium: 44px, radius 8px, padding 10/14 */
+  .field { display: flex; flex-direction: column; gap: var(--spacing-xs); }
+  .field__label { font-size: var(--text-sm); font-weight: 600; color: var(--text-secondary); }
+  .field__control { height: 44px; padding: 10px 14px; border: 1px solid var(--border-primary); border-radius: var(--radius-md); font-family: inherit; font-size: var(--text-md); background: var(--bg-primary); color: var(--text-primary); }
+  .field__control:focus-visible { outline: 2px solid var(--text-brand-primary); outline-offset: 1px; }
+  textarea.field__control { height: auto; min-height: 88px; resize: vertical; }
+  .field__hint { font-size: var(--text-xs); color: var(--text-tertiary); }
+
+  /* History table — v3 table: 72px rows, cell padding 16/24 */
   .history-table__scroll { overflow-x: auto; }
+  .history-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+  .history-table th, .history-table td { text-align: left; padding: 16px 24px; border-bottom: 1px solid var(--border-secondary); vertical-align: middle; }
+  .history-table tbody tr { height: 72px; }
+  .history-table thead th { background: var(--bg-tertiary); font-weight: 600; color: var(--text-secondary); }
 
-  /* ---- Buttons (components.md) ---- */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-xxs);
-    font-family: inherit;
-    font-weight: 600;
-    cursor: pointer;
-    border: 1px solid transparent;
-  }
-  .btn--large { height: 48px; padding: var(--spacing-lg) var(--spacing-3xl); font-size: var(--text-md); }
-  .btn--medium { height: 38px; padding: var(--spacing-md) var(--spacing-xl); font-size: var(--text-sm); }
-  .btn--primary { background: var(--bg-brand-solid); color: var(--text-white); border-color: var(--bg-brand-solid); }
-  .btn--primary:hover { background: var(--bg-brand-solid_hover); border-color: var(--bg-brand-solid_hover); }
-  .btn--secondary { background: var(--bg-primary); color: var(--text-brand-primary); border-color: var(--border-brand); }
-  .btn--secondary:hover { background: var(--bg-tertiary); }
-  .btn--destructive { background: var(--bg-error-solid); color: var(--text-white); border-color: var(--bg-error-solid); }
-  .btn--destructive:hover { filter: brightness(0.92); }
-  .btn:focus-visible { outline: 2px solid var(--text-brand-primary); outline-offset: 2px; }
-
-  /* ---- Closed / past dose round table state ---- */
-  .past-round {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-secondary);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-  }
-  .past-round__banner {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    padding: var(--spacing-lg) var(--spacing-xl);
-    background: var(--bg-tertiary);
-    color: var(--text-secondary);
-    font-size: var(--text-sm);
-    font-weight: 600;
-    border-bottom: 1px solid var(--border-secondary);
-  }
+  /* ---- A. Closed / past dose round table (v3 table) ---- */
+  .past-round { background: var(--bg-primary); border: 1px solid var(--border-secondary); border-radius: var(--radius-md); overflow: hidden; }
+  .past-round__banner { display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-lg) var(--spacing-3xl); background: var(--bg-tertiary); color: var(--text-secondary); font-size: var(--text-sm); font-weight: 600; border-bottom: 1px solid var(--border-secondary); }
   .med-table { width: 100%; border-collapse: collapse; }
-  .med-table th, .med-table td {
-    text-align: left;
-    padding: var(--spacing-lg);
-    border-bottom: 1px solid var(--border-secondary);
-    vertical-align: top;
-    font-size: var(--text-md);
-  }
+  .med-table th, .med-table td { text-align: left; padding: 16px 24px; border-bottom: 1px solid var(--border-secondary); vertical-align: middle; font-size: var(--text-md); }
+  .med-table tbody tr { height: 72px; }
   .med-table tbody tr:last-child td { border-bottom: none; }
-  .med-table thead th {
-    background: var(--bg-tertiary);
-    font-size: var(--text-sm);
-    font-weight: 600;
-    color: var(--text-secondary);
-  }
-  .med-cell { display: flex; gap: var(--spacing-lg); }
-  .med-cell__image { width: 40px; height: 40px; border-radius: var(--radius-xs); background: var(--bg-tertiary); flex-shrink: 0; }
+  .med-table thead th { background: var(--bg-tertiary); font-size: var(--text-sm); font-weight: 600; color: var(--text-secondary); }
+  .med-cell { display: flex; gap: var(--spacing-lg); align-items: flex-start; }
+  .med-cell__image { width: 40px; height: 40px; border-radius: var(--radius-md); background: var(--bg-tertiary); flex-shrink: 0; }
   .med-cell__name { font-weight: 600; }
   .med-cell__directions { margin: var(--spacing-xxs) 0 0; color: var(--text-tertiary); font-size: var(--text-sm); }
   .col-actions { width: 1%; white-space: nowrap; }
-  .cell-disabled { color: var(--text-disabled); }
-  .past-round__reason-disabled {
-    display: inline-flex;
-    align-items: center;
-    height: 44px;
-    padding: 0 var(--spacing-lg);
-    border: 1px solid var(--border-disabled);
-    border-radius: var(--radius-xs);
-    background: var(--bg-disabled);
-    color: var(--text-disabled);
-    font-size: var(--text-sm);
-    min-width: 160px;
-  }
+  .past-round__reason-disabled { display: inline-flex; align-items: center; height: 44px; padding: 0 14px; border: 1px solid var(--border-disabled); border-radius: var(--radius-md); background: var(--bg-disabled); color: var(--text-disabled); font-size: var(--text-sm); min-width: 160px; }
   .past-round__actions { display: flex; gap: var(--spacing-md); flex-wrap: wrap; }
+  .modal__icon-svg { width: 24px; height: 24px; }
 </style>
 </head>
 <body>
@@ -396,29 +233,24 @@
 <div class="showcase">
   <h1 class="showcase__title">Dose Round Tab — Omitted States</h1>
   <p class="showcase__intro">
-    States left out of the base Dose Round Tab screen: the closed/past dose round
-    table, and every modal triggered from the tab. Each modal is shown statically on
-    its backdrop; open/close, focus-trap and Esc are Angular behaviours (see file
-    header). AIN-only modals are out of MVP scope and excluded.
+    Rebuilt on components.md v3. Confirmation/alert modals (B, C, D, H, I) follow the
+    v3 confirmation pattern (400px, 16px radius, 48px featured icon, divider, 44px
+    close). Table/form modals (E, F, G) are not a documented v3 type — they use a
+    flagged panel shell built from shared v3 primitives and need separate extraction.
+    Open/close, focus-trap and Esc are Angular behaviours.
   </p>
 
-  <!-- ============================================================= -->
-  <!-- A. Closed / past dose round table state                       -->
-  <!-- Spec IV: "When the user clicks on a past dose round, then the  -->
-  <!-- 'Reason' and 'Admin' sections are disabled and the 'Paper      -->
-  <!-- Signed' and 'Incident Report Logged' buttons appear."          -->
-  <!-- ============================================================= -->
+  <!-- ===== A. Closed / past dose round (v3 table) ===== -->
   <section class="specimen" aria-labelledby="spec-a">
     <h2 class="specimen__label" id="spec-a">A. Closed / past dose round</h2>
     <p class="specimen__note">
-      Reason and Admin controls disabled; each row gains Paper Signed and Incident
-      Report Logged actions. Clicking either removes the medication and saves the record.
+      v3 72px rows. Reason and Admin disabled; each row gains Paper Signed and Incident
+      Report Logged actions (Medium 40px — below the 44px touch minimum; acceptable for
+      a secondary read-only action, noted).
     </p>
     <div class="past-round">
       <p class="past-round__banner">
-        <svg class="modal-warning__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <svg class="modal-warning__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Past dose round — read only. Record via Paper Signed or Incident Report Logged.
       </p>
       <table class="med-table">
@@ -445,13 +277,11 @@
             </td>
             <td>Oral</td>
             <td>0800 (2 tabs)</td>
-            <td>
-              <span class="past-round__reason-disabled" aria-disabled="true">&ndash;</span>
-            </td>
+            <td><span class="past-round__reason-disabled" aria-disabled="true">&ndash;</span></td>
             <td class="col-actions">
               <div class="past-round__actions">
-                <button type="button" class="btn btn--medium btn--secondary">Paper Signed</button>
-                <button type="button" class="btn btn--medium btn--secondary">Incident Report Logged</button>
+                <button type="button" class="btn btn--md btn--secondary">Paper Signed</button>
+                <button type="button" class="btn btn--md btn--secondary">Incident Report Logged</button>
               </div>
             </td>
           </tr>
@@ -460,70 +290,59 @@
     </div>
   </section>
 
-  <!-- ============================================================= -->
-  <!-- B. Confirmation modal (dosage-mismatch warning variant)       -->
-  <!-- Spec IV: warning displayed within the modal when the given    -->
-  <!-- dosage differs from 'Prescribed'. Standard variant = same     -->
-  <!-- modal without the .modal-warning strip.                       -->
-  <!-- ============================================================= -->
+  <!-- ===== B. Confirm administration — dosage mismatch (v3 confirmation) ===== -->
   <section class="specimen" aria-labelledby="spec-b">
     <h2 class="specimen__label" id="spec-b">B. Confirm administration — dosage mismatch</h2>
-    <p class="specimen__note">
-      Medium modal. The warning strip appears only when Given ≠ Prescribed; without it,
-      this is the standard confirmation.
-    </p>
+    <p class="specimen__note">v3 confirmation pattern. The warning strip (body slot) appears only when Given ≠ Prescribed.</p>
     <div class="modal-stage">
-      <div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="b-title">
+      <div class="modal modal--confirmation" role="dialog" aria-modal="true" aria-labelledby="b-title" aria-describedby="b-desc">
+        <button type="button" class="modal__close" aria-label="Close dialog">
+          <svg class="modal__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+        </button>
         <div class="modal__header">
-          <h3 class="modal__title" id="b-title">Confirm Administration for SMITH, John</h3>
-          <button type="button" class="modal__close" aria-label="Close dialog">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
-          </button>
-        </div>
-        <div class="modal__body">
-          <div class="modal-med">
-            <span class="modal-med__image" role="presentation"></span>
-            <div>
-              <div class="modal-med__name">Warfarin 5mg</div>
-              <p class="modal-med__meta">Prescribed 1 tab · Given 2 tabs · Oral · 1700</p>
-            </div>
+          <span class="modal__icon modal__icon--danger" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M10.3 3.9L2.6 17a2 2 0 001.7 3h15.4a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <div class="modal__text">
+            <h3 class="modal__title" id="b-title">Confirm Administration for SMITH, John</h3>
+            <p class="modal__description" id="b-desc">Warfarin 5mg · Prescribed 1 tab · Given 2 tabs · Oral · 1700</p>
           </div>
+        </div>
+        <div class="modal__divider"></div>
+        <div class="modal__body">
           <div class="modal-warning" role="alert">
-            <svg class="modal-warning__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path d="M12 9v4m0 4h.01M10.3 3.9L2.6 17a2 2 0 001.7 3h15.4a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <svg class="modal-warning__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 9v4m0 4h.01M10.3 3.9L2.6 17a2 2 0 001.7 3h15.4a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span>The dose being given (2 tabs) differs from the prescribed dose (1 tab). Confirm you intend to administer the amount entered.</span>
           </div>
         </div>
-        <div class="modal__footer">
-          <button type="button" class="btn btn--large btn--secondary">Cancel</button>
-          <button type="button" class="btn btn--large btn--primary">Confirm</button>
+        <div class="modal__actions">
+          <button type="button" class="btn btn--lg btn--secondary">Cancel</button>
+          <button type="button" class="btn btn--lg btn--primary">Confirm</button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ============================================================= -->
-  <!-- C. Secondary Authentication / Dual Sign modal                 -->
-  <!-- Spec IV: dual-sign icon → dual sign modal on administer, for   -->
-  <!-- Insulin / S4D / S8 / injections / Variable / Cytotoxic.        -->
-  <!-- ============================================================= -->
+  <!-- ===== C. Secondary Authentication / dual sign (v3 confirmation + form body) ===== -->
   <section class="specimen" aria-labelledby="spec-c">
     <h2 class="specimen__label" id="spec-c">C. Secondary Authentication (dual sign)</h2>
-    <p class="specimen__note">
-      Small modal. Witnessing RN/EN enters their credentials to co-sign. Agency users
-      cannot dual sign; an unauthorised PIN follows the same error path as elsewhere.
-    </p>
+    <p class="specimen__note">v3 confirmation shell with a form body (extension — flag in header). Agency users cannot dual sign.</p>
     <div class="modal-stage">
-      <div class="modal modal--sm" role="dialog" aria-modal="true" aria-labelledby="c-title">
+      <div class="modal modal--confirmation" role="dialog" aria-modal="true" aria-labelledby="c-title" aria-describedby="c-desc">
+        <button type="button" class="modal__close" aria-label="Close dialog">
+          <svg class="modal__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+        </button>
         <div class="modal__header">
-          <h3 class="modal__title" id="c-title">Secondary Authentication Required</h3>
-          <button type="button" class="modal__close" aria-label="Close dialog">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
-          </button>
+          <span class="modal__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 4v6c0 4-3 7-7 8-4-1-7-4-7-8V6z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <div class="modal__text">
+            <h3 class="modal__title" id="c-title">Secondary Authentication Required</h3>
+            <p class="modal__description" id="c-desc">A second authorised user must confirm administration of Actrapid Insulin.</p>
+          </div>
         </div>
+        <div class="modal__divider"></div>
         <div class="modal__body">
-          <p>A second authorised user must confirm administration of <strong>Actrapid Insulin</strong>.</p>
           <div class="field">
             <label class="field__label" for="c-witness">Witness name</label>
             <input class="field__control" id="c-witness" type="text" autocomplete="off">
@@ -533,84 +352,74 @@
             <input class="field__control" id="c-pin" type="password" inputmode="numeric" autocomplete="off">
           </div>
         </div>
-        <div class="modal__footer">
-          <button type="button" class="btn btn--large btn--secondary">Cancel</button>
-          <button type="button" class="btn btn--large btn--primary">Verify</button>
+        <div class="modal__actions">
+          <button type="button" class="btn btn--lg btn--secondary">Cancel</button>
+          <button type="button" class="btn btn--lg btn--primary">Verify</button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ============================================================= -->
-  <!-- D. BGL Reading Required modal                                  -->
-  <!-- Spec IV: pops when Force-BGL is on and no BGL entered on the   -->
-  <!-- Dose Round screen before administering Insulin.               -->
-  <!-- ============================================================= -->
+  <!-- ===== D. BGL Reading Required (v3 confirmation + form body) ===== -->
   <section class="specimen" aria-labelledby="spec-d">
     <h2 class="specimen__label" id="spec-d">D. BGL Reading Required</h2>
-    <p class="specimen__note">
-      Small modal. Entering a value here opens the Insulin Sliding Scale Directions
-      modal (E).
-    </p>
+    <p class="specimen__note">v3 confirmation shell with a single-field body. Entering a value opens the Insulin Sliding Scale Directions modal (E).</p>
     <div class="modal-stage">
-      <div class="modal modal--sm" role="dialog" aria-modal="true" aria-labelledby="d-title">
+      <div class="modal modal--confirmation" role="dialog" aria-modal="true" aria-labelledby="d-title" aria-describedby="d-desc">
+        <button type="button" class="modal__close" aria-label="Close dialog">
+          <svg class="modal__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+        </button>
         <div class="modal__header">
-          <h3 class="modal__title" id="d-title">BGL Reading Required</h3>
-          <button type="button" class="modal__close" aria-label="Close dialog">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
-          </button>
+          <span class="modal__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2s6 6.5 6 11a6 6 0 11-12 0c0-4.5 6-11 6-11z"/></svg>
+          </span>
+          <div class="modal__text">
+            <h3 class="modal__title" id="d-title">BGL Reading Required</h3>
+            <p class="modal__description" id="d-desc">Record the resident's BGL before administering Insulin.</p>
+          </div>
         </div>
+        <div class="modal__divider"></div>
         <div class="modal__body">
-          <p>Record the resident's BGL before administering Insulin.</p>
           <div class="field">
             <label class="field__label" for="d-bgl">BGL (mmol/L)</label>
             <input class="field__control" id="d-bgl" type="text" inputmode="decimal">
           </div>
         </div>
-        <div class="modal__footer">
-          <button type="button" class="btn btn--large btn--secondary">Cancel</button>
-          <button type="button" class="btn btn--large btn--primary">Continue</button>
+        <div class="modal__actions">
+          <button type="button" class="btn btn--lg btn--secondary">Cancel</button>
+          <button type="button" class="btn btn--lg btn--primary">Continue</button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ============================================================= -->
-  <!-- E. Insulin Sliding Scale Directions modal                     -->
-  <!-- Spec IV: shown after BGL entry. If administered dosage differs -->
-  <!-- from the BESTMED-calculated value, the modal expands with a    -->
-  <!-- 'Reason For Change:' section that must be filled to proceed.   -->
-  <!-- "Form + warning" variant → 768px, taller (components.md).      -->
-  <!-- ============================================================= -->
+  <!-- ===== E. Insulin Sliding Scale Directions (PANEL — not a v3 pattern) ===== -->
   <section class="specimen" aria-labelledby="spec-e">
-    <h2 class="specimen__label" id="spec-e">E. Insulin Sliding Scale Directions (expanded)</h2>
+    <h2 class="specimen__label" id="spec-e">E. Insulin Sliding Scale Directions <span style="font-weight:400;color:var(--text-warning-primary)">— not a documented v3 modal type</span></h2>
     <p class="specimen__note">
-      Large "Form + warning" modal. Shown in its expanded state — the Reason For Change
-      section appears once the administered dosage differs from the calculated value and
-      must be completed before proceeding. In the collapsed state that section is hidden.
+      Form + warning modal. Not a v3 confirmation dialog; uses the flagged panel shell
+      (shared v3 primitives only). Shown expanded — Reason for Change appears once the
+      administered dosage differs from the calculated value.
     </p>
     <div class="modal-stage">
-      <div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="e-title">
-        <div class="modal__header">
+      <div class="modal modal--panel" role="dialog" aria-modal="true" aria-labelledby="e-title">
+        <button type="button" class="modal__close" aria-label="Close dialog">
+          <svg class="modal__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+        </button>
+        <div class="modal__panel-header">
           <h3 class="modal__title" id="e-title">Insulin Sliding Scale Directions</h3>
-          <button type="button" class="modal__close" aria-label="Close dialog">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
-          </button>
         </div>
+        <div class="modal__divider"></div>
         <div class="modal__body">
           <p>Recorded BGL <strong>14.2 mmol/L</strong> at 20/07 0805.</p>
-          <div class="value-display">
-            BESTMED calculated dose: <strong>8 units</strong>
-          </div>
+          <div class="value-display">BESTMED calculated dose: <strong>8 units</strong></div>
           <div class="field">
             <label class="field__label" for="e-admin">Administered dosage (units)</label>
             <input class="field__control" id="e-admin" type="text" inputmode="decimal" value="6" aria-describedby="e-admin-hint">
             <span class="field__hint" id="e-admin-hint">Differs from the calculated dose — a reason is required below.</span>
           </div>
           <div class="modal-warning" role="alert">
-            <svg class="modal-warning__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path d="M12 9v4m0 4h.01M10.3 3.9L2.6 17a2 2 0 001.7 3h15.4a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <svg class="modal-warning__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 9v4m0 4h.01M10.3 3.9L2.6 17a2 2 0 001.7 3h15.4a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span>Administered dosage differs from the calculated value. Enter a reason for change to continue.</span>
           </div>
           <div class="field">
@@ -618,30 +427,27 @@
             <textarea class="field__control" id="e-reason" required></textarea>
           </div>
         </div>
-        <div class="modal__footer">
-          <button type="button" class="btn btn--large btn--secondary">Cancel</button>
-          <button type="button" class="btn btn--large btn--primary">Continue</button>
+        <div class="modal__actions">
+          <button type="button" class="btn btn--lg btn--secondary">Cancel</button>
+          <button type="button" class="btn btn--lg btn--primary">Continue</button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ============================================================= -->
-  <!-- F. View BGL History modal                                     -->
-  <!-- Spec IV columns: Date and Time / Observation (mmol/L) /        -->
-  <!-- Prescriber Range Below Limit / Prescriber Range Above Limit.  -->
-  <!-- ============================================================= -->
+  <!-- ===== F. View BGL History (PANEL — not a v3 pattern) ===== -->
   <section class="specimen" aria-labelledby="spec-f">
-    <h2 class="specimen__label" id="spec-f">F. View BGL History</h2>
-    <p class="specimen__note">Large modal. Read-only history table.</p>
+    <h2 class="specimen__label" id="spec-f">F. View BGL History <span style="font-weight:400;color:var(--text-warning-primary)">— not a documented v3 modal type</span></h2>
+    <p class="specimen__note">Table modal, flagged panel shell. v3 72px rows.</p>
     <div class="modal-stage">
-      <div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="f-title">
-        <div class="modal__header">
+      <div class="modal modal--panel" role="dialog" aria-modal="true" aria-labelledby="f-title">
+        <button type="button" class="modal__close" aria-label="Close dialog">
+          <svg class="modal__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+        </button>
+        <div class="modal__panel-header">
           <h3 class="modal__title" id="f-title">BGL History</h3>
-          <button type="button" class="modal__close" aria-label="Close dialog">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
-          </button>
         </div>
+        <div class="modal__divider"></div>
         <div class="modal__body">
           <div class="history-table__scroll">
             <table class="history-table">
@@ -662,30 +468,26 @@
             </table>
           </div>
         </div>
-        <div class="modal__footer">
-          <button type="button" class="btn btn--large btn--primary">Close</button>
+        <div class="modal__actions">
+          <button type="button" class="btn btn--lg btn--primary">Close</button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ============================================================= -->
-  <!-- G. View INR History modal — SPEC TRUNCATED (see header)        -->
-  <!-- ============================================================= -->
+  <!-- ===== G. View INR History (PANEL — not v3; spec truncated) ===== -->
   <section class="specimen" aria-labelledby="spec-g">
-    <h2 class="specimen__label" id="spec-g">G. View INR History <span style="font-weight:400;color:var(--text-warning-primary)">— spec truncated</span></h2>
-    <p class="specimen__note">
-      Built by analogy to BGL History; the source spec line for the INR History button is
-      cut off, so the exact required columns are unconfirmed.
-    </p>
+    <h2 class="specimen__label" id="spec-g">G. View INR History <span style="font-weight:400;color:var(--text-warning-primary)">— not a v3 modal type; spec truncated</span></h2>
+    <p class="specimen__note">Flagged panel shell. Columns built by analogy to BGL History; source spec line is cut off.</p>
     <div class="modal-stage">
-      <div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="g-title">
-        <div class="modal__header">
+      <div class="modal modal--panel" role="dialog" aria-modal="true" aria-labelledby="g-title">
+        <button type="button" class="modal__close" aria-label="Close dialog">
+          <svg class="modal__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+        </button>
+        <div class="modal__panel-header">
           <h3 class="modal__title" id="g-title">INR History</h3>
-          <button type="button" class="modal__close" aria-label="Close dialog">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
-          </button>
         </div>
+        <div class="modal__divider"></div>
         <div class="modal__body">
           <div class="history-table__scroll">
             <table class="history-table">
@@ -704,62 +506,61 @@
             </table>
           </div>
         </div>
-        <div class="modal__footer">
-          <button type="button" class="btn btn--large btn--primary">Close</button>
+        <div class="modal__actions">
+          <button type="button" class="btn btn--lg btn--primary">Close</button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ============================================================= -->
-  <!-- H. COVID-19 vaccine not-supported pop-up                      -->
-  <!-- Spec IV: exact message + single OK button.                    -->
-  <!-- ============================================================= -->
+  <!-- ===== H. COVID-19 vaccine not supported (v3 confirmation / alertdialog) ===== -->
   <section class="specimen" aria-labelledby="spec-h">
     <h2 class="specimen__label" id="spec-h">H. COVID-19 vaccine not supported</h2>
-    <p class="specimen__note">Small modal. Copy is verbatim from the spec.</p>
+    <p class="specimen__note">v3 confirmation pattern, single OK action. Copy verbatim from spec.</p>
     <div class="modal-stage">
-      <div class="modal modal--sm" role="alertdialog" aria-modal="true" aria-labelledby="h-title" aria-describedby="h-desc">
+      <div class="modal modal--confirmation" role="alertdialog" aria-modal="true" aria-labelledby="h-title" aria-describedby="h-desc">
+        <button type="button" class="modal__close" aria-label="Close dialog">
+          <svg class="modal__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+        </button>
         <div class="modal__header">
-          <h3 class="modal__title" id="h-title">COVID-19 Vaccine</h3>
-          <button type="button" class="modal__close" aria-label="Close dialog">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
-          </button>
+          <span class="modal__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01" stroke-linecap="round"/></svg>
+          </span>
+          <div class="modal__text">
+            <h3 class="modal__title" id="h-title">COVID-19 Vaccine</h3>
+            <p class="modal__description" id="h-desc">COVID-19 vaccine administration is not supported in offline mode. Please administer once back online.</p>
+          </div>
         </div>
-        <div class="modal__body">
-          <p id="h-desc">COVID-19 vaccine administration is not supported in offline mode. Please administer once back online.</p>
-        </div>
-        <div class="modal__footer">
-          <button type="button" class="btn btn--large btn--primary">OK</button>
+        <div class="modal__divider"></div>
+        <div class="modal__actions">
+          <button type="button" class="btn btn--lg btn--primary">OK</button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ============================================================= -->
-  <!-- I. Confirm Incident Report modal — SPEC CONTRADICTION (header) -->
-  <!-- ============================================================= -->
+  <!-- ===== I. Confirm Incident Report (v3 confirmation; spec contradiction) ===== -->
   <section class="specimen" aria-labelledby="spec-i">
     <h2 class="specimen__label" id="spec-i">I. Confirm Incident Report <span style="font-weight:400;color:var(--text-warning-primary)">— spec contradiction</span></h2>
-    <p class="specimen__note">
-      Triggered from the closed-round "Incident Report Logged" action (A). Section IV also
-      says "Do not support Incident Report Logged" — flagged, not resolved. On confirm the
-      medication is removed and the record saved.
-    </p>
+    <p class="specimen__note">v3 confirmation pattern. Section IV also says "Do not support Incident Report Logged" — flagged, not resolved.</p>
     <div class="modal-stage">
-      <div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="i-title">
+      <div class="modal modal--confirmation" role="dialog" aria-modal="true" aria-labelledby="i-title" aria-describedby="i-desc">
+        <button type="button" class="modal__close" aria-label="Close dialog">
+          <svg class="modal__icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+        </button>
         <div class="modal__header">
-          <h3 class="modal__title" id="i-title">Confirm Incident Report for SMITH, John</h3>
-          <button type="button" class="modal__close" aria-label="Close dialog">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
-          </button>
+          <span class="modal__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke-linejoin="round"/><path d="M14 2v6h6M9 13h6M9 17h4" stroke-linecap="round"/></svg>
+          </span>
+          <div class="modal__text">
+            <h3 class="modal__title" id="i-title">Confirm Incident Report for SMITH, John</h3>
+            <p class="modal__description" id="i-desc">Logging an incident report for Panadol Osteo 665mg will remove it from this dose round and save the record.</p>
+          </div>
         </div>
-        <div class="modal__body">
-          <p>Logging an incident report for <strong>Panadol Osteo 665mg</strong> will remove it from this dose round and save the record. Continue?</p>
-        </div>
-        <div class="modal__footer">
-          <button type="button" class="btn btn--large btn--secondary">Cancel</button>
-          <button type="button" class="btn btn--large btn--primary">Confirm</button>
+        <div class="modal__divider"></div>
+        <div class="modal__actions">
+          <button type="button" class="btn btn--lg btn--secondary">Cancel</button>
+          <button type="button" class="btn btn--lg btn--primary">Confirm</button>
         </div>
       </div>
     </div>
