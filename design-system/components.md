@@ -95,6 +95,50 @@ Two buttons (Cancel/Confirm), width is content-driven — don't hardcode.
 </div>
 ```
 
+## Modal — Panel types (form + data)
+
+Distinct from the confirmation dialog above — used when a modal must carry a
+form or a data table rather than a featured icon + message. Shares the
+confirmation dialog's shell primitives (radius, close button) at a wider width.
+
+*Source: defined from the v3 modal shell primitives for the panel use cases
+(Insulin Sliding Scale form; BGL/INR History tables). Not itself an isolated
+Figma extraction — reconcile against Untitled UI Pro's form/data-modal
+components when those are pulled.*
+
+**Outer container:** --width-lg (640px), --radius-2xl (16px), close button
+44×44px top-right.
+
+**Header:** title only (--text-xl), 24px padding, 20px bottom padding, 1px
+full-width divider below. No featured icon (unlike the confirmation dialog).
+
+**Body:** 24px padding, --spacing-lg (12px) internal gap. Carries either:
+- Form content — stacked input fields (Medium, 44px), a value-display block for
+  read-only calculated values, and/or a warning strip; or
+- A data table — v3 Table rows (72px, 16/24 cell padding) in a horizontal
+  scroll wrapper.
+
+**Actions footer:** 24px padding, 32px top padding, buttons horizontal with
+12px gap, Large (44px). One (Close) or two (Cancel/Confirm) buttons, width
+content-driven — don't hardcode.
+
+```html
+<div class="modal modal--panel">
+  <button class="modal__close" aria-label="Close">×</button>
+  <div class="modal__panel-header"><h3 class="modal__title"></h3></div>
+  <div class="modal__divider"></div>
+  <div class="modal__body"><!-- form fields OR data table --></div>
+  <div class="modal__actions">
+    <button class="btn btn--lg btn--secondary">Cancel</button>
+    <button class="btn btn--lg btn--primary">Confirm</button>
+  </div>
+</div>
+```
+
+Reference implementations: form panel = Insulin Sliding Scale Directions;
+table panel = BGL / INR History (output/dose-round-tab-states.html, specimens
+E/F/G).
+
 ## Input field (text)
 
 | Size | Field height | Padding V | Padding H | Radius |

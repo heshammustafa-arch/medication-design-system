@@ -92,7 +92,7 @@ still built from written specs, not from this file's example screens.
 | 2. Radius | — | Extracted (11-step scale) |
 | 4. Widths | — | Extracted (breakpoint scale) |
 | 5. Containers | — | Extracted (padding/max-width defaults) |
-| ❖ SHARED COMPONENTS | 1030:33572 | Not extracted — BESTMED's own component measurements used instead |
+| ❖ SHARED COMPONENTS | 1030:33572 | Component specs extracted here (v3). Confirmation modal extracted; **panel modal types (form + data/table) NOT yet extracted** — components.md "Modal — Panel types" is defined from shell primitives, needs a node-id to reconcile |
 | ❖ APPLICATION EXAMPLES | 1664:398801 | Reference/inspiration only, not extracted |
 | _Primitives | — | Not extracted directly (407 vars) — accessed only via alias resolution from Spacing/Widths/Containers |
 
