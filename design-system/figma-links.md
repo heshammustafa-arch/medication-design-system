@@ -83,7 +83,8 @@ public repo — redistribution to unlicensed users is restricted, and a
 public repo counts as that.
 
 Source of truth for design-tokens.md structure (Colour semantic layer,
-Typography, Spacing, Radius, Widths, Containers) as of the v2 migration.
+Typography, Spacing, Radius, Widths, Containers, Effects/Shadows) as of the
+v2 migration.
 Component patterns (Application Examples) are reference-only inspiration
 for spec-writing, not extracted or used directly — BestDOSE screens are
 still built from written specs, not from this file's example screens.
@@ -96,6 +97,7 @@ still built from written specs, not from this file's example screens.
 | 2. Radius | — | Extracted (11-step scale) |
 | 4. Widths | — | Extracted (breakpoint scale) |
 | 5. Containers | — | Extracted (padding/max-width defaults) |
+| ❖ Effect styles (Shadows) | 1532:352912 | Extracted 21 Jul 2026 → design-tokens.md Shadow section (7 tokens: xs–3xl; supersedes File 1 shadows 423:6344) |
 | ❖ SHARED COMPONENTS | 1030:33572 | Component specs extracted here (v3). Confirmation modal extracted; **panel modal types (form + data/table) NOT yet extracted** — components.md "Modal — Panel types" is defined from shell primitives, needs a node-id to reconcile |
 | ❖ APPLICATION EXAMPLES | 1664:398801 | Reference/inspiration only, not extracted |
 | _Primitives | — | Not extracted directly (407 vars) — accessed only via alias resolution from Spacing/Widths/Containers |

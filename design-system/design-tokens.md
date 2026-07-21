@@ -190,8 +190,21 @@ per screen — don't assume 32px is correct for existing app patterns.
 
 ## Shadow
 
+Untitled UI "Effect styles" — extracted from File 3 (Untitled UI Pro,
+node 1532:352912 "Shadows") on 21 July 2026. Supersedes the earlier BESTMED
+shadow values (File 1, node 423:6344) for the v3 system. Every layer uses
+`rgba(10,13,18, α)` — a near-black slate, not pure black — and the larger
+steps stack multiple drop-shadow layers (copy the whole value verbatim).
+
 | Token | Value |
 |---|---|
-| --shadow-sm | 0 1px 6px rgba(0,0,0,0.1) |
-| --shadow-md | 0 2px 12px rgba(0,0,0,0.1) |
-| --shadow-lg | 0 4px 16px rgba(0,0,0,0.1) |
+| --shadow-xs | 0 1px 2px 0 rgba(10,13,18,0.05) |
+| --shadow-sm | 0 1px 3px 0 rgba(10,13,18,0.10), 0 1px 2px -1px rgba(10,13,18,0.10) |
+| --shadow-md | 0 4px 6px -1px rgba(10,13,18,0.10), 0 2px 4px -2px rgba(10,13,18,0.06) |
+| --shadow-lg | 0 12px 16px -4px rgba(10,13,18,0.08), 0 4px 6px -2px rgba(10,13,18,0.03), 0 2px 2px -1px rgba(10,13,18,0.04) |
+| --shadow-xl | 0 20px 24px -4px rgba(10,13,18,0.08), 0 8px 8px -4px rgba(10,13,18,0.03), 0 3px 3px -1.5px rgba(10,13,18,0.04) |
+| --shadow-2xl | 0 24px 48px -12px rgba(10,13,18,0.18), 0 4px 4px -2px rgba(10,13,18,0.04) |
+| --shadow-3xl | 0 32px 64px -12px rgba(10,13,18,0.14), 0 5px 5px -2.5px rgba(10,13,18,0.04) |
+
+Old BESTMED shadow tokens (--shadow-sm/md/lg = 0 1px 6px / 0 2px 12px /
+0 4px 16px rgba(0,0,0,0.1)) are retired — do not use.

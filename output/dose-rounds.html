@@ -23,11 +23,9 @@
      to --bg-brand-solid and the v3 secondary button.
   3. Icons are inline-SVG placeholders (output/ convention), logo is a text wordmark
      — swap in the Untitled UI icon set / real brand asset for production.
-  4. SHADOWS: --shadow-xs/sm/md here are Untitled-UI-style elevation values, defined
-     LOCALLY. They are NOT yet in design-tokens.md (whose --shadow-* were extracted
-     from the legacy BESTMED file). Extract the real Untitled UI effect tokens into
-     design-tokens.md on the next File 3 sync, then reference them here. Flagged so
-     these values are not treated as canonical tokens until extracted.
+  4. SHADOWS: --shadow-xs/sm/md are the real Untitled UI effect tokens, extracted
+     from File 3 (Untitled UI Pro, node 1532:352912 "Shadows") 21 Jul 2026 and now
+     canonical in design-tokens.md. Values here match the design system verbatim.
 -->
 <!doctype html>
 <html lang="en">
@@ -51,9 +49,10 @@
     --spacing-xs: 4px; --spacing-sm: 6px; --spacing-md: 8px; --spacing-lg: 12px;
     --spacing-xl: 16px; --spacing-2xl: 20px; --spacing-3xl: 24px; --spacing-4xl: 32px; --spacing-5xl: 40px; --spacing-7xl: 64px;
     --radius-sm: 6px; --radius-md: 8px; --radius-lg: 10px; --radius-xl: 12px; --radius-2xl: 16px; --radius-full: 9999px;
-    --shadow-xs: 0 1px 2px rgba(16,24,40,0.06);
-    --shadow-sm: 0 1px 3px rgba(16,24,40,0.10), 0 1px 2px rgba(16,24,40,0.06);
-    --shadow-md: 0 4px 8px -2px rgba(16,24,40,0.10), 0 2px 4px -2px rgba(16,24,40,0.06);
+    /* Untitled UI effect tokens — extracted from File 3 (node 1532:352912); see design-tokens.md */
+    --shadow-xs: 0 1px 2px 0 rgba(10,13,18,0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(10,13,18,0.10), 0 1px 2px -1px rgba(10,13,18,0.10);
+    --shadow-md: 0 4px 6px -1px rgba(10,13,18,0.10), 0 2px 4px -2px rgba(10,13,18,0.06);
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: var(--font-family-base); color: var(--text-primary); background: var(--bg-secondary); }
