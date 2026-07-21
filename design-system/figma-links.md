@@ -1,8 +1,12 @@
 # Figma Reference Log
 
-Three files in play. None can be opened passively — every value in
-design-tokens.md and components.md came from a live, explicit extraction
-against a specific file key and node ID via the Figma MCP connector.
+Four files in play (File 4 added 21 Jul 2026). None can be opened
+passively — every value in design-tokens.md and components.md came from a
+live, explicit extraction against a specific file key and node ID via the
+Figma MCP connector.
+
+Note: CLAUDE.md still says "Three Figma files in play" — that predates
+File 4 and is now stale; update it if File 4 becomes a standing source.
 
 ## File 1 — BESTMED Design System (legacy component library)
 
@@ -95,6 +99,29 @@ still built from written specs, not from this file's example screens.
 | ❖ SHARED COMPONENTS | 1030:33572 | Component specs extracted here (v3). Confirmation modal extracted; **panel modal types (form + data/table) NOT yet extracted** — components.md "Modal — Panel types" is defined from shell primitives, needs a node-id to reconcile |
 | ❖ APPLICATION EXAMPLES | 1664:398801 | Reference/inspiration only, not extracted |
 | _Primitives | — | Not extracted directly (407 vars) — accessed only via alias resolution from Spacing/Widths/Containers |
+
+## File 4 — Dose Rounds (production screen source)
+
+URL base: https://www.figma.com/design/4yxqkYG3so5HxgTMvFzvh5/Dose-Rounds
+File key: 4yxqkYG3so5HxgTMvFzvh5
+
+Added 21 Jul 2026. A large multi-artboard file holding the real production
+Dose Rounds screens (legacy BESTMED styling — Open Sans, 2px radii, slate
+#39506E / teal #3DA8B8 accents). Used as a CONTENT/LAYOUT reference for
+copying real screens and re-skinning them to the v3 system — not a token
+source (design-tokens.md still comes from Files 1 + 3). Provenance vs the
+licensed Untitled UI system is unverified; treat extracted legacy values
+as reference only.
+
+Dozens of artboards exist (Maindose desktop/tablet variants and states);
+only the node below has been extracted so far.
+
+| Page / Frame | Node ID | Status |
+|---|---|---|
+| BESTDose / Dose Rounds / Desktop (1440×804) | 1:17768 | Extracted → merged into output/dose-rounds.html (v3 skin, Figma content) |
+| BESTDose / Dose Rounds / Desktop (tablet, 1024×768) | 1:17806 | Not extracted |
+| Maindose - Desktop (1446×2825) | 1:17851 | Not extracted |
+| Maindose - Tablet (many) | 1:18110, … | Not extracted |
 
 ## How this gets used
 
